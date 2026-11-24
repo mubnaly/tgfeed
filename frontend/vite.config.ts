@@ -10,6 +10,7 @@ import { NAVIGATE_FALLBACK_DENYLIST } from './src/lib/swDenylist';
 // (HttpOnly, SameSite=Lax) is treated as same-origin. In production the backend
 // serves this build from `frontend/dist` at `/`, so no proxy is needed there.
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? '/',
   plugins: [
     react(),
     tailwindcss(),
