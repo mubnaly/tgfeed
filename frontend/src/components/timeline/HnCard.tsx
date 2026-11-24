@@ -15,13 +15,15 @@ import { hnCommentsUrl } from '@/lib/sources';
 import { useUnreadIndicator } from '@/lib/unreadIndicator';
 import { cn } from '@/lib/utils';
 import { hnLinkAttrs } from '@/lib/vibeReader';
+import { useI18n } from '@/i18n';
 import type { ReadTarget, TimelineItem } from '@/lib/types';
 
-import { AiSummaryBlock, displaySummary } from './AiSummaryBlock';
+import { displaySummary } from './AiSummaryBlock';
 import { AnnotationBadge } from './AnnotationBadge';
 import { ForwardedBadge } from './ForwardedBadge';
 import { VibeReaderBadge } from './VibeReaderBadge';
 import { LinkPreviewCard } from './LinkPreviewCard';
+import { AiSummaryButton, SummaryBox, useItemSummary } from './AiSummaryAction';
 
 interface Props {
   /** Envelope with `hn` present. */
@@ -65,10 +67,23 @@ function HnSelfText({ text }: { text: string }) {
 }
 
 function HnCardImpl({ item, observe, pendingKeys }: Props) {
+  const { t } = useI18n();
   const hn = item.hn!;
   const save = useSaveToggle();
   const { mode } = useUnreadIndicator();
   const { open, openPane } = useItemDetailPane();
+
+  const { summary, isSummarizing, showSummary, summaryCached, summaryError, toggleOrSummarize } = useItemSummary(
+    item.key,
+    hn.summary,
+  );
+
+  const handleSummaryClick = () => {
+    toggleOrSummarize({
+      title: hn.title,
+      text: hn.text || hn.preview?.description || null,
+    });
+  };
 
   const attach = useCallback(
     (el: HTMLElement | null) => {
@@ -120,7 +135,7 @@ function HnCardImpl({ item, observe, pendingKeys }: Props) {
             <span
               aria-hidden
               className={cn(
-                'absolute top-1/2 right-full mr-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
+                'absolute top-1/2 end-full me-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
                 isPending ? 'bg-emerald-500 dark:bg-emerald-400' : !item.is_read && 'bg-sky-500 dark:bg-sky-400',
               )}
             />
@@ -146,13 +161,20 @@ function HnCardImpl({ item, observe, pendingKeys }: Props) {
         {isJob && (
           <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">Job</span>
         )}
+        <AiSummaryButton
+          onClick={handleSummaryClick}
+          active={Boolean(summary || showSummary)}
+          loading={isSummarizing}
+          title={summary ? t('summary.title') : t('summary.btn')}
+          className="ms-auto"
+        />
         <button
           type="button"
           onClick={() => save.mutate({ key: item.key, saved: !item.is_saved })}
           aria-label={item.is_saved ? 'Remove from saved' : 'Save'}
           aria-pressed={item.is_saved}
           className={cn(
-            'ml-auto rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
+            'rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
             item.is_saved ? 'text-amber-500' : 'text-muted-foreground',
           )}
         >
@@ -164,6 +186,7 @@ function HnCardImpl({ item, observe, pendingKeys }: Props) {
         href={hn.url ?? commentsUrl}
         target="_blank"
         rel="noreferrer"
+        dir="auto"
         {...vrAttrs}
         className={cn(
           'mt-1 block text-sm leading-relaxed font-medium break-words hover:underline',
@@ -175,11 +198,13 @@ function HnCardImpl({ item, observe, pendingKeys }: Props) {
 
       {!hn.url && hn.text && <HnSelfText text={hn.text} />}
 
-      {/* The LLM summary (schema v19): what the article says, then what the thread
-          makes of it — the reader decides from here whether to open either. Under
-          the title and above the meta line, in the shared `AiSummaryBlock`, so
-          machine words look the same on every surface that carries them. */}
-      <AiSummaryBlock summary={hn.summary} className="mt-1.5" />
+      <SummaryBox
+        show={showSummary}
+        isSummarizing={isSummarizing}
+        summary={summary}
+        cached={summaryCached}
+        error={summaryError}
+      />
 
       <div className={cn('mt-1 flex items-center gap-2 text-xs text-muted-foreground', isJob && 'opacity-70')}>
         {hn.day_rank != null && (

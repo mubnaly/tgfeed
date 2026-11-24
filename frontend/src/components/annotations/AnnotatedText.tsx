@@ -159,7 +159,7 @@ export function AnnotatedText({ annotations, onCreate, onSetComment, onDelete, c
     try {
       await onCreate(context);
     } catch (e) {
-      toast.error(errorMessage(e, '高亮失败，请重试'));
+      toast.error(errorMessage(e, 'Failed to highlight, please retry'));
     }
   };
 
@@ -168,7 +168,7 @@ export function AnnotatedText({ annotations, onCreate, onSetComment, onDelete, c
     try {
       await onDelete(id);
     } catch (e) {
-      toast.error(errorMessage(e, '删除失败，请重试'));
+      toast.error(errorMessage(e, 'Failed to delete, please retry'));
     }
   };
 
@@ -218,7 +218,7 @@ export function AnnotatedText({ annotations, onCreate, onSetComment, onDelete, c
           style={{ top: toolbar.below ? toolbar.top + 6 : toolbar.top - 6, left: toolbar.left }}
         >
           <Highlighter className="size-3.5" />
-          高亮
+          Highlight
         </button>
       )}
 
@@ -237,15 +237,15 @@ export function AnnotatedText({ annotations, onCreate, onSetComment, onDelete, c
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 transition-colors hover:bg-accent"
           >
             <MessageSquareText className="size-3.5" />
-            评论
+            Comment
           </button>
           <button
             type="button"
             onClick={() => deleteHighlight(menu.annotation.id)}
-            className="inline-flex items-center gap-1.5 border-l px-2.5 py-1.5 text-destructive transition-colors hover:bg-accent"
+            className="inline-flex items-center gap-1.5 border-s px-2.5 py-1.5 text-destructive transition-colors hover:bg-accent"
           >
             <Trash2 className="size-3.5" />
-            删除
+            Delete
           </button>
         </div>
       )}

@@ -20,8 +20,8 @@ from datetime import timedelta
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db, search
-from condenser.app import create_app
+from tgfeed import db, search
+from tgfeed.app import create_app
 from tests.conftest import BASE, md, seed_channel, seed_messages
 
 FEED_A = 'https://a.example.com/feed.xml'
@@ -46,7 +46,7 @@ def rss_env(env, monkeypatch):
     # the trap test_x_verdict hit on 2026-08-09; the rule gets its own test below,
     # which turns it back on and drives it directly.
     monkeypatch.setenv('CONDENSER_CLEANUP_RSS_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
 
@@ -385,8 +385,8 @@ def test_forward_renders_an_rss_entry_as_one_title_link(rss_env):
     init()
     subscribe(FEED_A)
     entry = seed_entry(FEED_A, 'g1', minutes=10, title='标题 & 副标题')
-    from condenser.forward import render
-    from condenser.items import parse_key
+    from tgfeed.forward import render
+    from tgfeed.items import parse_key
 
     body = render(parse_key(f'rss:{entry.id}'))
     assert body == f'<b><a href="{FEED_A}#g1">标题 &amp; 副标题</a></b>'
@@ -398,8 +398,8 @@ def test_forward_renders_an_rss_entry_as_one_title_link(rss_env):
 
 def test_an_ingested_entry_is_searchable_by_title_and_body(rss_env):
     """Indexing hangs off ingest, so a round leaves the archive searchable."""
-    from condenser.rss import FetchResult, RssManager
-    from condenser.config import get_settings
+    from tgfeed.rss import FetchResult, RssManager
+    from tgfeed.config import get_settings
 
     init()
     subscribe(FEED_A)
@@ -463,8 +463,8 @@ def test_retention_deletes_old_untouched_entries_and_keeps_engaged_ones(rss_env,
     """The rule reads backwards until said out loud: an **unread** old entry is
     deleted, a **read** one is kept forever — X's semantics, and for the same
     reason (the backlog nobody will scroll back to is what costs disk)."""
-    from condenser.cleanup import RssRetentionRule
-    from condenser.config import get_settings
+    from tgfeed.cleanup import RssRetentionRule
+    from tgfeed.config import get_settings
 
     monkeypatch.setenv('CONDENSER_CLEANUP_RSS_ENABLED', 'true')
     get_settings.cache_clear()
@@ -479,7 +479,7 @@ def test_retention_deletes_old_untouched_entries_and_keeps_engaged_ones(rss_env,
     fresh = seed_entry(FEED_A, 'fresh', minutes=10)
     search.rebuild()
 
-    from condenser.items import parse_key
+    from tgfeed.items import parse_key
 
     db.mark_read([parse_key(f'rss:{read.id}')])
     db.add_saved_item('rss', saved.id, 0, {'id': saved.id})
@@ -505,7 +505,7 @@ def test_rows_by_id_chunks_below_the_bound_variable_limit(rss_env):
 
     from telememo import db as tdb
 
-    from condenser.sources import rss as rss_source
+    from tgfeed.sources import rss as rss_source
 
     init()
     subscribe(FEED_A)

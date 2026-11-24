@@ -18,8 +18,8 @@ from datetime import timedelta
 
 import pytest
 
-from condenser import db, search, x
-from condenser.items import ItemKey
+from tgfeed import db, search, x
+from tgfeed.items import ItemKey
 from tests.conftest import BASE, md, seed_channel, seed_messages
 
 
@@ -593,8 +593,8 @@ def _tg_manager():
     """A TgManager with a stub service — enough to drive the ingest hooks."""
     from unittest.mock import AsyncMock, MagicMock
 
-    from condenser.config import get_settings
-    from condenser.tg import TgManager
+    from tgfeed.config import get_settings
+    from tgfeed.tg import TgManager
 
     manager = TgManager(get_settings())
     manager.service = MagicMock(is_authorized=AsyncMock(return_value=True))

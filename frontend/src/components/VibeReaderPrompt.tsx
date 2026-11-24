@@ -33,11 +33,11 @@ export function VibeReaderPrompt() {
   useEffect(() => {
     if (!available || linked || prompted.current || isDismissed()) return;
     prompted.current = true;
-    toast('检测到 Vibe Reader', {
-      description: '开启联动后，从这里点开的链接会在侧栏自动生成摘要。',
+    toast('Vibe Reader detected', {
+      description: 'When enabled, links clicked here will automatically generate summaries in the Vibe Reader sidebar.',
       duration: 15_000,
-      action: { label: '开启', onClick: () => setLink(true) },
-      cancel: { label: '不再提示', onClick: dismiss },
+      action: { label: 'Enable', onClick: () => setLink(true) },
+      cancel: { label: "Don't show again", onClick: dismiss },
     });
   }, [available, linked, setLink]);
 

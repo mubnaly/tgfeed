@@ -28,10 +28,10 @@ import math
 import os
 from datetime import datetime, timedelta
 
-from condenser import db, verdict as verdict_mod, x
-from condenser.channels import ChannelScore, resolve
-from condenser.config import get_settings
-from condenser.verdict import channel_policy, classify, enabled_channels
+from tgfeed import db, verdict as verdict_mod, x
+from tgfeed.channels import ChannelScore, resolve
+from tgfeed.config import get_settings
+from tgfeed.verdict import channel_policy, classify, enabled_channels
 
 NOW = datetime(2026, 7, 28, 12, 0)
 
@@ -521,7 +521,7 @@ async def test_the_prospective_monitor_scores_a_shadow_channel_without_crediting
     """The two halves meeting: the shadow channel is invisible to the as-shipped
     attribution (it claimed nothing) and fully visible to the replay (it left a
     score). That is what lets a channel earn admission before being admitted."""
-    from condenser import prospective
+    from tgfeed import prospective
 
     mgr = seed_bait_world(monkeypatch, CONDENSER_VERDICT_SHADOW_CHANNELS='d')
     ingest('foryou', bird_entry(301, 'save this thread 🧵 rust tools you must know', 5))
@@ -686,7 +686,7 @@ async def test_the_author_prior_reads_no_text_and_costs_no_embedding_call(env, m
 async def test_status_reports_the_enabled_channels(env, monkeypatch):
     from fastapi.testclient import TestClient
 
-    from condenser.app import create_app
+    from tgfeed.app import create_app
 
     seed_bait_world(monkeypatch, CONDENSER_VERDICT_CHANNELS='b,d')
 
@@ -702,7 +702,7 @@ async def test_status_reports_the_shadow_channels(env, monkeypatch):
     outside — no badge ever changes — so the status line has to name it."""
     from fastapi.testclient import TestClient
 
-    from condenser.app import create_app
+    from tgfeed.app import create_app
 
     seed_bait_world(monkeypatch, CONDENSER_VERDICT_SHADOW_CHANNELS='c,d')
 

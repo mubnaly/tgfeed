@@ -29,12 +29,12 @@ from datetime import timedelta
 import httpx
 import pytest
 
-from condenser import db, search
-from condenser import hn_summary as hn_summary_mod
-from condenser import preview as preview_mod
-from condenser import summary as summary_mod
-from condenser.config import get_settings
-from condenser.items import parse_key
+from tgfeed import db, search
+from tgfeed import hn_summary as hn_summary_mod
+from tgfeed import preview as preview_mod
+from tgfeed import summary as summary_mod
+from tgfeed.config import get_settings
+from tgfeed.items import parse_key
 from tests.conftest import BASE
 from tests.test_multi_source import _client, _login, seed_hn, subscribe_hn
 from tests.test_rss_summary import FakeSummarizer

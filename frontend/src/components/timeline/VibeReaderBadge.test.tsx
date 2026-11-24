@@ -41,32 +41,32 @@ describe('VibeReaderBadge', () => {
   it('spins through queued / extracting / generating, naming the step', () => {
     const { container } = render(<VibeReaderBadge urls={[URL]} />);
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'queued' });
-    expect(screen.getByLabelText('Vibe Reader 排队中')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader queued')).toBeInTheDocument();
     expect(container.querySelector('.animate-spin')).not.toBeNull();
 
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'extracting' });
-    expect(screen.getByLabelText('Vibe Reader 正在提取正文')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader extracting content')).toBeInTheDocument();
 
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'generating' });
-    expect(screen.getByLabelText('Vibe Reader 正在生成')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader generating summary')).toBeInTheDocument();
     expect(container.querySelector('.animate-spin')).not.toBeNull();
   });
 
   it('shows the lightning once done, with the modes when the extension named them', () => {
     const { container } = render(<VibeReaderBadge urls={[URL]} />);
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'done', modes: ['summary', 'discussion'] });
-    expect(screen.getByLabelText('Vibe Reader 已就绪 · summary, discussion')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader ready · summary, discussion')).toBeInTheDocument();
     expect(container.querySelector('.animate-spin')).toBeNull();
 
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'done' });
-    expect(screen.getByLabelText('Vibe Reader 已就绪')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader ready')).toBeInTheDocument();
   });
 
   it('names an error and stops spinning', () => {
     const { container } = render(<VibeReaderBadge urls={[URL]} />);
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'generating' });
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'error' });
-    expect(screen.getByLabelText('Vibe Reader 生成失败')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader failed to generate')).toBeInTheDocument();
     expect(container.querySelector('.animate-spin')).toBeNull();
   });
 
@@ -75,7 +75,7 @@ describe('VibeReaderBadge', () => {
     render(<VibeReaderBadge urls={[URL, comments]} />);
     fromBridge({ type: 'vibe-reader:status', url: URL, state: 'done' });
     fromBridge({ type: 'vibe-reader:status', url: comments, state: 'extracting' });
-    expect(screen.getByLabelText('Vibe Reader 正在提取正文')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vibe Reader extracting content')).toBeInTheDocument();
   });
 
   it('disappears when the sidepanel closes', () => {

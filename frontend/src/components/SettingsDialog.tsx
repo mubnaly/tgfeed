@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Circle, Lock, LogIn, LogOut, Minus, Monitor, Moon, Phone, Puzzle, Sun } from 'lucide-react';
+import { Circle, Globe, Lock, LogIn, LogOut, Minus, Monitor, Moon, Phone, Puzzle, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -15,37 +15,40 @@ import { Switch } from '@/components/ui/switch';
 import { useAppMeta, useSetForwardChannel, useSetLanguages } from '@/hooks/useAppMeta';
 import { useTgStatus } from '@/hooks/useTgStatus';
 import { useVibeReader } from '@/hooks/useVibeReader';
+import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
 import { queryClient, TG_STATUS_KEY } from '@/lib/queryClient';
 import { type Theme, useTheme } from '@/lib/theme';
 import { type UnreadIndicatorMode, useUnreadIndicator } from '@/lib/unreadIndicator';
 
-const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: Monitor },
+const THEME_OPTIONS: { value: Theme; labelKey: string; icon: typeof Sun }[] = [
+  { value: 'light', labelKey: 'settings.theme.light', icon: Sun },
+  { value: 'dark', labelKey: 'settings.theme.dark', icon: Moon },
+  { value: 'system', labelKey: 'settings.theme.system', icon: Monitor },
 ];
 
-const UNREAD_OPTIONS: { value: UnreadIndicatorMode; label: string; icon: typeof Circle }[] = [
-  { value: 'divider', label: 'Divider', icon: Minus },
-  { value: 'dot', label: 'Dot', icon: Circle },
+const UNREAD_OPTIONS: { value: UnreadIndicatorMode; labelKey: string; icon: typeof Circle }[] = [
+  { value: 'divider', labelKey: 'settings.unreadIndicator.divider', icon: Minus },
+  { value: 'dot', labelKey: 'settings.unreadIndicator.dot', icon: Circle },
 ];
 
-/** Offered languages (primary subtags). The backend accepts any 2-3 letter code,
- *  so growing this list is a constant edit, not a schema change. */
-const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'zh', label: '中文' },
+/** English and Arabic exclusively */
+export const LANGUAGE_OPTIONS: { value: string; label: string }[] = [
   { value: 'en', label: 'English' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
+  { value: 'ar', label: 'العربية' },
 ];
 
-/** The one line that tells "no extension" from "extension, link off" from
- *  "extension at a protocol version we don't speak". */
-function vibeReaderStatusText(s: { available: boolean; linked: boolean; version: number | null }): string {
-  if (s.available) return s.linked ? '已连接 · 联动开启' : '已连接 · 联动关闭';
-  if (s.version != null) return `已连接 · 协议版本不匹配 (v${s.version})`;
-  return '未检测到扩展';
+export function vibeReaderStatusText(
+  s: { available: boolean; linked: boolean; version: number | null },
+  t: (k: string, v?: Record<string, string | number>) => string,
+): string {
+  if (s.available) {
+    return s.linked ? t('settings.vibeReader.status.connectedLinked') : t('settings.vibeReader.status.connectedUnlinked');
+  }
+  if (s.version != null) {
+    return t('settings.vibeReader.status.versionMismatch', { version: s.version });
+  }
+  return t('settings.vibeReader.status.notDetected');
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -53,6 +56,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const { t, locale, setLocale } = useI18n();
   const { data: status } = useTgStatus();
   const tgConnected = status?.status === 'authorized';
   const { theme, setTheme } = useTheme();
@@ -95,18 +99,16 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>Telegram account and appearance.</DialogDescription>
+          <DialogTitle>{t('settings.title')}</DialogTitle>
+          <DialogDescription>{t('settings.section.appearance')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2.5">
-          <SectionLabel>Telegram</SectionLabel>
+          <SectionLabel>{t('settings.section.telegram')}</SectionLabel>
           <div className="flex items-center gap-2 text-sm">
             <Phone className="size-4 text-muted-foreground" />
-            <span>{tgConnected ? (status?.phone ?? 'Connected') : 'Not connected'}</span>
+            <span>{tgConnected ? (status?.phone ?? t('common.done')) : t('settings.telegram.notConnected')}</span>
           </div>
-          {/* Reachable only on a multi-source install: the gate no longer walls
-              those off, so this is the one entry left to the Telegram login. */}
           {tgConnected ? (
             <Button
               variant="outline"
@@ -115,26 +117,46 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
               onClick={() => setConfirmTgLogout(true)}
             >
               <LogOut className="size-4" />
-              Disconnect Telegram
+              {t('settings.telegram.disconnect')}
             </Button>
           ) : (
             <Button variant="outline" size="sm" className="w-full justify-start" asChild>
               <Link to="/connect-telegram" onClick={() => onOpenChange(false)}>
                 <LogIn className="size-4" />
-                Connect Telegram
+                {t('settings.telegram.connect')}
               </Link>
             </Button>
           )}
         </div>
 
+        {/* UI Language Selection */}
         <div className="space-y-2">
-          <SectionLabel>Appearance</SectionLabel>
+          <SectionLabel>{t('settings.uiLanguage')}</SectionLabel>
+          <div className="grid grid-cols-2 gap-1.5">
+            <SegmentedOption
+              icon={Globe}
+              label={t('settings.uiLanguage.en')}
+              active={locale === 'en'}
+              onClick={() => setLocale('en')}
+            />
+            <SegmentedOption
+              icon={Globe}
+              label={t('settings.uiLanguage.ar')}
+              active={locale === 'ar'}
+              onClick={() => setLocale('ar')}
+            />
+          </div>
+        </div>
+
+        {/* Theme Appearance */}
+        <div className="space-y-2">
+          <SectionLabel>{t('settings.theme')}</SectionLabel>
           <div className="grid grid-cols-3 gap-1.5">
             {THEME_OPTIONS.map((opt) => (
               <SegmentedOption
                 key={opt.value}
                 icon={opt.icon}
-                label={opt.label}
+                label={t(opt.labelKey)}
                 active={theme === opt.value}
                 onClick={() => setTheme(opt.value)}
               />
@@ -142,14 +164,15 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           </div>
         </div>
 
+        {/* Unread Indicator */}
         <div className="space-y-2">
-          <SectionLabel>Unread</SectionLabel>
+          <SectionLabel>{t('settings.unreadIndicator')}</SectionLabel>
           <div className="grid grid-cols-2 gap-1.5">
             {UNREAD_OPTIONS.map((opt) => (
               <SegmentedOption
                 key={opt.value}
                 icon={opt.icon}
-                label={opt.label}
+                label={t(opt.labelKey)}
                 active={unreadMode === opt.value}
                 onClick={() => setUnreadMode(opt.value)}
               />
@@ -157,9 +180,10 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           </div>
         </div>
 
+        {/* Content Language Filter */}
         <div className="space-y-2">
-          <SectionLabel>语言</SectionLabel>
-          <div className="grid grid-cols-4 gap-1.5">
+          <SectionLabel>{t('settings.contentLanguages')}</SectionLabel>
+          <div className="grid grid-cols-2 gap-1.5">
             {LANGUAGE_OPTIONS.map((opt) => (
               <LanguageOption
                 key={opt.value}
@@ -169,54 +193,52 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">全局语言偏好；X For You 开启「按语言过滤」后只保留所选语言。</p>
+          <p className="text-xs text-muted-foreground">{t('settings.contentLanguages.desc')}</p>
         </div>
 
+        {/* Forward Channel Target */}
         <div className="space-y-2">
-          <SectionLabel>Forward</SectionLabel>
+          <SectionLabel>{t('settings.section.forward')}</SectionLabel>
           <form
             className="flex gap-2"
             onSubmit={(e) => {
               e.preventDefault();
               setForward.mutate(forwardChannel.trim(), {
-                onSuccess: () => toast.success('Forward channel saved'),
+                onSuccess: () => toast.success(t('common.saved')),
               });
             }}
           >
             <Input
               value={forwardChannel}
               onChange={(e) => setForwardChannel(e.target.value)}
-              placeholder="@channel or t.me/… (empty to clear)"
+              placeholder={t('settings.forwardChannel.placeholder')}
             />
             <Button type="submit" variant="outline" disabled={!forwardDirty || setForward.isPending}>
-              Save
+              {t('common.save')}
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground">Target channel for "forward to my channel".</p>
+          <p className="text-xs text-muted-foreground">{t('settings.forwardChannel.desc')}</p>
         </div>
 
+        {/* Vibe Reader Integration */}
         <div className="space-y-2">
-          <SectionLabel>Vibe Reader</SectionLabel>
-          {/* The switch mirrors the extension's own; flipping it only *asks* (the
-              answer comes back as vibe-reader:link), so no optimistic state here.
-              Disabled without a bridge: there is nobody to ask. */}
+          <SectionLabel>{t('settings.section.vibeReader')}</SectionLabel>
           <div className="flex items-center gap-2 text-sm">
             <Puzzle className="size-4 text-muted-foreground" />
-            <span className="flex-1">{vibeReaderStatusText(vibe)}</span>
+            <span className="flex-1">{vibeReaderStatusText(vibe, t)}</span>
             <Switch
-              aria-label="Vibe Reader 联动"
+              aria-label="Vibe Reader Sync"
               checked={vibe.linked}
               disabled={!vibe.available}
               onCheckedChange={(v) => vibe.setLink(v)}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            开启后，从这里点开的链接会在 Vibe Reader 侧栏自动生成摘要。开关的状态由扩展保存。
-          </p>
+          <p className="text-xs text-muted-foreground">{t('settings.vibeReader.desc')}</p>
         </div>
 
+        {/* Authorized Devices */}
         <div className="space-y-2">
-          <SectionLabel>Devices</SectionLabel>
+          <SectionLabel>{t('settings.section.devices')}</SectionLabel>
           <DeviceList />
         </div>
 
@@ -227,16 +249,16 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           onClick={() => appLock.mutate()}
         >
           <Lock className="size-4" />
-          Lock app
+          {t('nav.logout')}
         </Button>
 
         <ConfirmDialog
           open={confirmTgLogout}
           onOpenChange={setConfirmTgLogout}
-          title="Disconnect Telegram?"
-          description="This logs out your Telegram session — you'll sign in again with a code to read channels. Saved items remain."
+          title={t('settings.telegram.disconnect')}
+          description={t('settings.telegram.confirmDisconnect')}
           destructive
-          confirmLabel="Disconnect"
+          confirmLabel={t('settings.telegram.disconnect')}
           pending={tgLogout.isPending}
           onConfirm={() => tgLogout.mutate()}
         />

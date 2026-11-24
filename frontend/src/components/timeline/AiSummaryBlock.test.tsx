@@ -4,9 +4,9 @@ import { render, screen } from '@testing-library/react';
 import { AiSummaryBlock, displaySummary } from './AiSummaryBlock';
 
 describe('AiSummaryBlock', () => {
-  it('puts the 「AI 摘要」 label before the summary, inside the same block', () => {
+  it('puts the 「AI Summary」 label before the summary, inside the same block', () => {
     const { container } = render(<AiSummaryBlock summary="文章讲了三件事。" />);
-    const label = screen.getByText('AI 摘要');
+    const label = screen.getByText('AI Summary');
     const text = screen.getByText('文章讲了三件事。');
     // The eye meets "a machine wrote this" first, then the words.
     expect(label.compareDocumentPosition(text) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

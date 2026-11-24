@@ -49,8 +49,8 @@ from pydantic import BaseModel, TypeAdapter
 from telememo import db as tdb
 from telememo.types import ChannelInfo, MessageData, WebPagePreview
 
-from condenser import db, filters, search
-from condenser.config import get_settings
+from tgfeed import db, filters, search
+from tgfeed.config import get_settings
 
 # Verified (blue-check) public channels only, so the reviewer sees nobody's
 # private reading list and no unofficial re-poster. The three official Telegram

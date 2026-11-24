@@ -15,8 +15,8 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from condenser import db, x
-from condenser.app import create_app
+from tgfeed import db, x
+from tgfeed.app import create_app
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'x'
 
@@ -167,7 +167,7 @@ def test_an_empty_push_is_accepted_while_the_list_is_empty(env):
 
 def test_push_is_refused_while_the_source_is_disabled(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_X_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     _init()
@@ -212,7 +212,7 @@ def test_probe_config_does_not_ask_when_nothing_is_subscribed(env):
 
 def test_probe_config_does_not_ask_while_the_source_is_disabled(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_X_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     _init()
@@ -338,7 +338,7 @@ def test_thread_ancestors_are_archived_but_never_enter_the_timeline(env, monkeyp
 
 def test_the_age_rule_uses_a_configurable_window(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_X_FOLLOWING_MAX_AGE_HOURS', '48')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     _init()

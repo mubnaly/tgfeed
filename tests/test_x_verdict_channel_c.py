@@ -18,8 +18,8 @@ channel has to learn each flag's rate from the labels rather than assume it.
 
 import pytest
 
-from condenser import attributes as attrs
-from condenser.config import get_settings
+from tgfeed import attributes as attrs
+from tgfeed.config import get_settings
 
 
 def labeled(flags, verdict, reason=None):
@@ -226,7 +226,7 @@ def test_every_chip_reason_maps_somewhere_explicit(env):
     """A chip the scorer silently ignores is a chip that costs the reader a tap and
     buys nothing — so the mapping is exhaustive over db.FEEDBACK_REASONS, with the
     two that belong to other channels named as such rather than merely absent."""
-    from condenser import db
+    from tgfeed import db
 
     assert set(attrs.REASON_FLAGS) == set(db.FEEDBACK_REASONS)
     assert attrs.REASON_FLAGS['topic'] == ()  # channel B's business

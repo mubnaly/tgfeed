@@ -46,7 +46,7 @@ describe('ItemNoteDialog', () => {
     const props = mount();
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), '  我的看法  ');
-    await user.click(screen.getByRole('button', { name: '保存' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(api.setNote).toHaveBeenCalledWith('hn:42', '我的看法'));
     expect(props.onSaved).toHaveBeenCalledWith('我的看法');
@@ -60,21 +60,21 @@ describe('ItemNoteDialog', () => {
     // Seeded with the current note, and the placeholder says what clearing does.
     const box = screen.getByRole('textbox');
     expect(box).toHaveValue('旧评论');
-    expect(box).toHaveAttribute('placeholder', '清空保存 = 删除评论');
+    expect(box).toHaveAttribute('placeholder', 'Clear text to delete note');
 
     const user = userEvent.setup();
     await user.clear(box);
-    await user.click(screen.getByRole('button', { name: '保存' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(api.setNote).toHaveBeenCalledWith('hn:42', ''));
     expect(props.onSaved).toHaveBeenCalledWith('');
   });
 
-  it('保存并转发 persists the note first, then hands it to the forward chain', async () => {
+  it('Save & Forward persists the note first, then hands it to the forward chain', async () => {
     vi.mocked(api.setNote).mockResolvedValue({ ok: true });
     const props = mount();
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), '转发语');
-    await user.click(screen.getByRole('button', { name: /保存并转发/ }));
+    await user.click(screen.getByRole('button', { name: /Save & Forward/ }));
 
     await waitFor(() => expect(props.onForward).toHaveBeenCalledWith('转发语'));
     expect(api.setNote).toHaveBeenCalledWith('hn:42', '转发语');
@@ -82,9 +82,9 @@ describe('ItemNoteDialog', () => {
     expect(props.onOpenChange).not.toHaveBeenCalledWith(false);
   });
 
-  it('disables 保存并转发 on an empty note — nothing to prefill', () => {
+  it('disables Save & Forward on an empty note — nothing to prefill', () => {
     mount();
-    expect(screen.getByRole('button', { name: /保存并转发/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Save & Forward/ })).toBeDisabled();
   });
 
   it('keeps the dialog open and reports when the save fails', async () => {
@@ -92,7 +92,7 @@ describe('ItemNoteDialog', () => {
     const props = mount();
     const user = userEvent.setup();
     await user.type(screen.getByRole('textbox'), 'x');
-    await user.click(screen.getByRole('button', { name: '保存' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(api.setNote).toHaveBeenCalled());
     expect(props.onSaved).not.toHaveBeenCalled();

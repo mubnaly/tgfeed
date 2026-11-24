@@ -13,8 +13,8 @@ export function AnnotationBadge({ item }: { item: TimelineItem }) {
   if (!hasNotes(item)) return null;
   return (
     <span
-      title="有评论或高亮"
-      aria-label="有评论或高亮"
+      title="Has comments or highlights"
+      aria-label="Has comments or highlights"
       className="inline-flex shrink-0 items-center text-indigo-500/80 dark:text-indigo-400/80"
     >
       <MessageSquareText className="size-3.5" />

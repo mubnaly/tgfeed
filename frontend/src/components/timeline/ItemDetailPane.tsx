@@ -11,6 +11,7 @@ import { useItemAnnotations } from '@/hooks/useItemAnnotations';
 import { useLinkPreviews, useUrlPreview } from '@/hooks/useLinkPreviews';
 import { useSaveToggle } from '@/hooks/useSaveToggle';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { useI18n } from '@/i18n';
 import { errorMessage } from '@/lib/api';
 import { tgMessageUrl } from '@/lib/format';
 import { useItemDetailPane } from '@/lib/itemDetailPane';
@@ -48,6 +49,7 @@ function CardSkeleton() {
  * across views.
  */
 export function ItemDetailPane() {
+  const { t } = useI18n();
   const { open, close } = useItemDetailPane();
   const msg = open?.telegram ?? null;
   const story = open?.hn ?? null;
@@ -122,7 +124,7 @@ export function ItemDetailPane() {
       {
         onError: (e) => {
           setSavedOverride({ item, saved: !next });
-          toast.error(errorMessage(e, next ? '收藏失败' : '取消收藏失败'));
+          toast.error(errorMessage(e, next ? 'Failed to save' : 'Failed to remove from saved'));
         },
       },
     );
@@ -132,13 +134,13 @@ export function ItemDetailPane() {
     if (!open) return;
     const key = open.key;
     hide.mutate(key, {
-      onError: (e) => toast.error(errorMessage(e, '隐藏失败')),
+      onError: (e) => toast.error(errorMessage(e, 'Failed to hide item')),
     });
     close();
     setForwardOpen(false);
-    toast('已隐藏', {
-      description: '该条目不会再出现在时间线中。',
-      action: { label: '撤销', onClick: () => unhide.mutate(key) },
+    toast(t('detail.hide'), {
+      description: 'Item hidden from timeline.',
+      action: { label: t('common.undo'), onClick: () => unhide.mutate(key) },
     });
   };
 
@@ -159,16 +161,16 @@ export function ItemDetailPane() {
       <SheetContent side="right" className="gap-0 p-0 sm:max-w-xl">
         <SheetHeader className="border-b">
           <SheetTitle className="flex items-center gap-2">
-            <Info className="size-4" /> 条目详情
+            <Info className="size-4" /> {t('detail.title')}
           </SheetTitle>
           <SheetDescription>
             {story
-              ? '该 Hacker News 条目的完整信息。'
+              ? 'Full information for this Hacker News story.'
               : tweet
-                ? '该推文的完整信息。'
+                ? 'Full information for this tweet.'
                 : entry
-                  ? '该文章的完整信息。'
-                  : '该消息的完整信息。'}
+                  ? 'Full information for this article.'
+                  : 'Full information for this message.'}
           </SheetDescription>
         </SheetHeader>
 
@@ -189,9 +191,9 @@ export function ItemDetailPane() {
               onClick={toggleSaved}
             >
               <Bookmark className={cn('size-4', isSaved && 'fill-current')} />
-              {isSaved ? '已收藏' : '收藏'}
+              {isSaved ? t('detail.saved') : t('detail.save')}
             </Button>
-            {/* iOS 的动作行顺序：收藏、评论、转发。有评论时按钮转靛蓝实心。 */}
+            {/* iOS action order: save, note, forward. */}
             <Button
               variant="outline"
               size="sm"
@@ -199,7 +201,7 @@ export function ItemDetailPane() {
               onClick={() => setNoteOpen(true)}
             >
               <MessageSquare className={cn('size-4', currentNote && 'fill-current')} />
-              评论
+              {t('detail.note')}
             </Button>
             <Button
               variant="outline"
@@ -207,7 +209,7 @@ export function ItemDetailPane() {
               className="shrink-0"
               onClick={() => {
                 if (!meta.data?.forward_channel) {
-                  toast.info('请先在设置中配置转发的目标频道。');
+                  toast.info(t('forward.configureTarget'));
                   return;
                 }
                 setForwardComment(undefined);
@@ -215,17 +217,17 @@ export function ItemDetailPane() {
               }}
             >
               <Forward className="size-4" />
-              转发
+              {t('detail.forward')}
             </Button>
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto">
-          {/* 正文区：可高亮的条目文本（RSS 在这里加载全文）。 */}
+          {/* Body section: annotatable item content (RSS lazily fetches full article here). */}
           {open && <ItemDetailBody item={open} annotations={annotations} />}
 
           <div className="space-y-3 p-4">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">链接预览</p>
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Link Previews</p>
             {pending ? (
               <>
                 <CardSkeleton />
@@ -235,20 +237,20 @@ export function ItemDetailPane() {
               </>
             ) : query.isError ? (
               <div className="flex flex-col items-center gap-3 py-8 text-center text-sm text-muted-foreground">
-                <p>{errorMessage(query.error, '链接预览加载失败。')}</p>
+                <p>{errorMessage(query.error, 'Failed to load link previews.')}</p>
                 <Button variant="outline" size="sm" onClick={() => query.refetch()}>
-                  重试
+                  {t('common.retry')}
                 </Button>
               </div>
             ) : previews.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 {story
-                  ? '自荐帖，无外部链接 — 讨论即内容。'
+                  ? 'Self post without external links.'
                   : tweet
-                    ? '该推文没有外部链接。'
+                    ? 'No external links in this tweet.'
                     : entry
-                      ? '该条目没有原文链接。'
-                      : '消息中没有链接。'}
+                      ? 'No external links in this article.'
+                      : 'No links in this message.'}
               </p>
             ) : (
               previews.map((p, i) => (
@@ -277,22 +279,22 @@ export function ItemDetailPane() {
             >
               <ExternalLink className="size-4" />
               {story
-                ? 'Open comments on Hacker News'
+                ? t('detail.openHn')
                 : tweet
-                  ? 'Open original on X'
+                  ? t('detail.viewOnX')
                   : entry
-                    ? 'Open original article'
-                    : 'Open original in Telegram'}
+                    ? t('detail.openOriginal')
+                    : t('detail.openTelegram')}
             </a>
             <Button
               variant="outline"
               size="sm"
               className="shrink-0 text-muted-foreground hover:text-destructive"
-              title="从时间线中永久隐藏该条目（所有客户端生效）"
+              title="Hide item from timeline"
               onClick={hideOpenItem}
             >
               <EyeOff className="size-4" />
-              隐藏
+              {t('detail.hide')}
             </Button>
           </div>
         )}
@@ -311,7 +313,7 @@ export function ItemDetailPane() {
               // 评论已落库；带着它进转发弹窗（在那边再改只影响发出的消息）。
               setNoteOpen(false);
               if (!meta.data?.forward_channel) {
-                toast.info('评论已保存。转发需要先在设置中配置目标频道。');
+                toast.info(t('forward.configureTarget'));
                 return;
               }
               setForwardComment(note);

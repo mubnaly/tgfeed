@@ -8,8 +8,8 @@ from fastapi.testclient import TestClient
 from telememo import db as tdb
 from telememo.types import SignInResult
 
-from condenser import db, filters
-from condenser.app import create_app
+from tgfeed import db, filters
+from tgfeed.app import create_app
 from tests.conftest import md, seed_channel, seed_messages
 
 
@@ -743,8 +743,8 @@ def test_realtime_ingest_filtered_and_new_poll(env):
         assert 50 in ids and 51 not in ids
 
         # /timeline/new (poll) sees the unfiltered new message, not the filtered one
-        from condenser.sources.base import pack_pos
-        from condenser.timeline import encode_cursor_map
+        from tgfeed.sources.base import pack_pos
+        from tgfeed.timeline import encode_cursor_map
 
         old_cursor = encode_cursor_map({'telegram': pack_pos('2020-01-01 00:00:00+00:00', 0)})
         new = client.get(f'/api/timeline/new?after={old_cursor}').json()
@@ -1043,9 +1043,9 @@ def test_startup_warms_entity_cache_from_dialogs(env):
     """
     import asyncio
 
-    from condenser.config import get_settings
-    from condenser.crypto import encrypt_session
-    from condenser.tg import TgManager
+    from tgfeed.config import get_settings
+    from tgfeed.crypto import encrypt_session
+    from tgfeed.tg import TgManager
 
     async def scenario():
         db.init_db(os.environ['CONDENSER_DB_PATH'])
@@ -1085,8 +1085,8 @@ def test_auth_error_demotes_session_to_unauthorized(env):
 
     from telethon.errors import UnauthorizedError
 
-    from condenser.config import get_settings
-    from condenser.crypto import encrypt_session
+    from tgfeed.config import get_settings
+    from tgfeed.crypto import encrypt_session
 
     class _Revoked(UnauthorizedError):  # construct without telethon's RPCError args
         def __init__(self):
@@ -1217,7 +1217,7 @@ def test_filter_preview_long_message_window(env):
 
 
 def test_filter_excerpt_clips_highlights_to_window():
-    from condenser.routers.subscriptions import _excerpt
+    from tgfeed.routers.subscriptions import _excerpt
 
     assert _excerpt('arc', [(0, 3)]) == ('arc', [(0, 3)])
     text, spans = _excerpt('x' * 800, [(290, 310), (630, 650)])

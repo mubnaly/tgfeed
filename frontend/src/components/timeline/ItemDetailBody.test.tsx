@@ -72,7 +72,7 @@ describe('ItemDetailBody (RSS)', () => {
     wrap(rssItem());
     // The excerpt keeps the section honest the whole way.
     expect(screen.getByText('the excerpt')).toBeInTheDocument();
-    expect(await screen.findByText('正文加载失败')).toBeInTheDocument();
+    expect(await screen.findByText('Failed to load article')).toBeInTheDocument();
     expect(screen.getByText('the excerpt')).toBeInTheDocument();
   });
 
@@ -84,7 +84,7 @@ describe('ItemDetailBody (RSS)', () => {
 
   it('marks the AI summary as machine words above the article', async () => {
     wrap(rssItem({ summary: '三句话摘要。', content: '<p>body</p>' }));
-    const label = screen.getByText('AI 摘要');
+    const label = screen.getByText('AI Summary');
     const summary = screen.getByText('三句话摘要。');
     const body = screen.getByText('body');
     expect(label.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -106,7 +106,7 @@ function hnItem(over: Record<string, unknown> = {}): TimelineItem {
 describe('ItemDetailBody (HN summary)', () => {
   it('renders the summary block for an external-link story, which has no body of its own', () => {
     wrap(hnItem({ summary: '文章讲了 X。讨论认为 Y。' }));
-    const label = screen.getByText('AI 摘要');
+    const label = screen.getByText('AI Summary');
     const summary = screen.getByText('文章讲了 X。讨论认为 Y。');
     expect(label.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -184,8 +184,8 @@ describe('ItemDetailBody (X article)', () => {
     vi.mocked(api.xTweet).mockRejectedValue(new Error('offline'));
     wrap(xArticleItem({ ...ARTICLE, has_content: true }));
     expect(screen.getByText('我做了个 Mac 工具。')).toBeInTheDocument();
-    expect(screen.getByText('正在加载全文…')).toBeInTheDocument();
-    expect(await screen.findByText('正文加载失败')).toBeInTheDocument();
+    expect(screen.getByText('Loading full text...')).toBeInTheDocument();
+    expect(await screen.findByText('Failed to load article')).toBeInTheDocument();
     expect(screen.getByText('我做了个 Mac 工具。')).toBeInTheDocument();
   });
 
@@ -203,28 +203,28 @@ describe('ItemDetailBody (X article)', () => {
     });
     wrap(list);
     expect(screen.getByText('我做了个 Mac 工具。')).toBeInTheDocument();
-    expect(screen.queryByText('正在加载全文…')).toBeNull();
+    expect(screen.queryByText('Loading full text...')).toBeNull();
     // it still asks — a failed read is retried by the next probe round
     await vi.waitFor(() => expect(api.xTweet).toHaveBeenCalled());
-    expect(await screen.findByText('未获取到 article 正文')).toBeInTheDocument();
+    expect(await screen.findByText('Article content unavailable')).toBeInTheDocument();
     // not a request error: that one has its own line
-    expect(screen.queryByText('正文加载失败')).toBeNull();
+    expect(screen.queryByText('Failed to load article')).toBeNull();
     expect(screen.getByText('我做了个 Mac 工具。')).toBeInTheDocument();
   });
 
   it('with no body promised, a failed request still says the body was not fetched, not that it failed to load', async () => {
     vi.mocked(api.xTweet).mockRejectedValue(new Error('offline'));
     wrap(xArticleItem({ ...ARTICLE, has_content: false }));
-    expect(screen.queryByText('正在加载全文…')).toBeNull();
-    expect(await screen.findByText('未获取到 article 正文')).toBeInTheDocument();
-    expect(screen.queryByText('正文加载失败')).toBeNull();
+    expect(screen.queryByText('Loading full text...')).toBeNull();
+    expect(await screen.findByText('Article content unavailable')).toBeInTheDocument();
+    expect(screen.queryByText('Failed to load article')).toBeNull();
     expect(screen.getByText('我做了个 Mac 工具。')).toBeInTheDocument();
   });
 
   it('does not claim the body is missing before the answer is in', () => {
     vi.mocked(api.xTweet).mockReturnValue(new Promise(() => {}));
     wrap(xArticleItem({ ...ARTICLE, has_content: false }));
-    expect(screen.queryByText('未获取到 article 正文')).toBeNull();
+    expect(screen.queryByText('Article content unavailable')).toBeNull();
   });
 
   it('picks up a body that arrived after the list was loaded', async () => {
@@ -284,7 +284,7 @@ describe('ItemDetailBody (other sources)', () => {
       created_at: null,
     };
     wrap(item, { ...noopAnnotations, annotations: [orphan] });
-    expect(screen.getByText('失效的高亮（原文已变，引文保留）')).toBeInTheDocument();
+    expect(screen.getByText('Orphaned highlights (original text changed, quotes preserved)')).toBeInTheDocument();
     expect(screen.getByText('曾经画过的话')).toBeInTheDocument();
     expect(screen.getByText('当时的想法')).toBeInTheDocument();
   });

@@ -11,9 +11,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import crypto, preview, purifier
-from condenser.app import create_app
-from condenser.auth import COOKIE_NAME, READER_COOKIE_NAME
+from tgfeed import crypto, preview, purifier
+from tgfeed.app import create_app
+from tgfeed.auth import COOKIE_NAME, READER_COOKIE_NAME
 
 OWN = 'https://condenser.example'
 BASE = 'https://blog.example/posts/hello/'
@@ -430,7 +430,7 @@ def test_extract_readable_returns_none_when_unparseable():
 
 
 def test_reader_template_is_self_contained():
-    from condenser import purifier_html
+    from tgfeed import purifier_html
 
     toolbar = purifier.Toolbar(
         original_url='https://a.example/x', mode='readable', full_page_url='/p/a.example/x?_mode=proxy'
@@ -481,7 +481,7 @@ def test_render_puremd_html_replaces_image_placeholders_with_alt():
 
 
 async def test_fetch_page_falls_back_to_http_only_on_transport_errors(env, monkeypatch):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     calls = []
 
@@ -500,7 +500,7 @@ async def test_fetch_page_falls_back_to_http_only_on_transport_errors(env, monke
 
 
 async def test_fetch_page_does_not_retry_http_status_errors(env, monkeypatch):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     calls = []
 
@@ -517,7 +517,7 @@ async def test_fetch_page_does_not_retry_http_status_errors(env, monkeypatch):
 
 
 async def test_fetch_page_does_not_retry_read_timeouts(env, monkeypatch):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     calls = []
 
@@ -545,7 +545,7 @@ def test_detect_charset_priority():
 
 
 def _settings(**overrides):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     s = get_settings()
     for k, v in overrides.items():
@@ -740,7 +740,7 @@ async def test_render_asset_refuses_scripts(env):
 
 
 def _install(monkeypatch, fetch_page=None, fetch_puremd=None):
-    from condenser.routers import purifier as router
+    from tgfeed.routers import purifier as router
 
     if fetch_page is not None:
         monkeypatch.setattr(router, '_fetch_page', fetch_page)
@@ -883,7 +883,7 @@ def test_hn_is_proxied_and_query_is_forwarded_raw(env, monkeypatch):
         assert r.status_code == 200
         assert seen == ['https://news.ycombinator.com/item?id=49537553&p=2&x=a%2Fb']
         assert 'cd-purifier-bar' in r.text
-        assert '整页' in r.text and '_mode=proxy' not in r.text  # no full-page link in proxy mode
+        assert 'Full' in r.text and '_mode=proxy' not in r.text  # no full-page link in proxy mode
         assert r.headers['content-type'].startswith('text/html')
 
 
@@ -995,7 +995,7 @@ def test_asset_responses_are_sandboxed(env, monkeypatch):
 
 def test_allow_js_sends_csp(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_PURIFIER_ALLOW_JS', 'true')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     _install(monkeypatch, _page(PROXY_HTML.encode()))

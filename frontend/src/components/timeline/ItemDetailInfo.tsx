@@ -6,6 +6,7 @@ import { ChannelAvatar } from '@/components/ChannelAvatar';
 import { HnGlyph } from '@/components/HnGlyph';
 import { RssGlyph } from '@/components/RssGlyph';
 import { XAvatar } from '@/components/XAvatar';
+import { useI18n } from '@/i18n';
 import { channelName, compactNumber, fullDateLabel } from '@/lib/format';
 import { FEEDBACK_REASON_LABELS, hnCommentsUrl, rssFeedLabel, xProfileUrl, X_FORYOU_FEED } from '@/lib/sources';
 import type { Subscription, TimelineItem } from '@/lib/types';
@@ -16,7 +17,7 @@ import { XVerdictDetail } from './XVerdictDetail';
 function DetailRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex gap-3 text-sm">
-      <dt className="w-16 shrink-0 text-muted-foreground">{label}</dt>
+      <dt className="w-20 shrink-0 text-muted-foreground">{label}</dt>
       <dd className="min-w-0 flex-1 break-words text-foreground/90">{children}</dd>
     </div>
   );
@@ -30,6 +31,7 @@ interface Props {
 
 /** Source-dispatched detail list for the open item. */
 export function ItemDetailInfo({ item, sub }: Props) {
+  const { t } = useI18n();
   const msg = item.telegram;
   const hn = item.hn;
   const tweet = item.x;
@@ -41,24 +43,26 @@ export function ItemDetailInfo({ item, sub }: Props) {
     const title = sub ? channelName(sub) : channelName(msg.channel);
     return (
       <dl className="space-y-1.5">
-        <DetailRow label="频道">
+        <DetailRow label={t('detail.channel')}>
           <span className="inline-flex items-center gap-1.5">
             <ChannelAvatar channelId={msg.channel_id} name={title} className="size-4 text-[8px]" />
             <span>{title}</span>
             {sub?.username && <span className="text-muted-foreground">@{sub.username}</span>}
           </span>
         </DetailRow>
-        {msg.sender_name && <DetailRow label="作者">{msg.sender_name}</DetailRow>}
-        <DetailRow label="发布时间">{fullDateLabel(msg.date)}</DetailRow>
-        {msg.is_edited && msg.edit_date && <DetailRow label="编辑时间">{fullDateLabel(msg.edit_date)}</DetailRow>}
+        {msg.sender_name && <DetailRow label={t('detail.author')}>{msg.sender_name}</DetailRow>}
+        <DetailRow label={t('detail.publishedAt')}>{fullDateLabel(msg.date)}</DetailRow>
+        {msg.is_edited && msg.edit_date && <DetailRow label={t('detail.editedAt')}>{fullDateLabel(msg.edit_date)}</DetailRow>}
         {msg.is_forwarded && (
-          <DetailRow label="转发自">
-            {fwdName ?? '未知来源'}
+          <DetailRow label={t('detail.forwardedFrom')}>
+            {fwdName ?? t('detail.unknownSource')}
             {fwd?.original_date && <span className="text-muted-foreground"> · {fullDateLabel(fwd.original_date)}</span>}
           </DetailRow>
         )}
-        {msg.media_items.length > 0 && <DetailRow label="媒体">{msg.media_items.length} 项</DetailRow>}
-        <DetailRow label="条目 ID">{item.key}</DetailRow>
+        {msg.media_items.length > 0 && (
+          <DetailRow label={t('detail.media')}>{t('detail.mediaCount', { count: msg.media_items.length })}</DetailRow>
+        )}
+        <DetailRow label="ID">{item.key}</DetailRow>
       </dl>
     );
   }
@@ -67,10 +71,10 @@ export function ItemDetailInfo({ item, sub }: Props) {
     const m = tweet.metrics;
     return (
       <dl className="space-y-1.5">
-        <DetailRow label="作者">
+        <DetailRow label={t('detail.author')}>
           <span className="inline-flex items-center gap-1.5">
             <XAvatar handle={tweet.author_handle} name={tweet.author_name} className="size-4 text-[8px]" />
-            <span>{tweet.author_name ?? '未知'}</span>
+            <span>{tweet.author_name ?? t('common.unknown')}</span>
             {tweet.author_handle && (
               <a
                 href={xProfileUrl(tweet.author_handle)}
@@ -83,37 +87,34 @@ export function ItemDetailInfo({ item, sub }: Props) {
             )}
           </span>
         </DetailRow>
-        <DetailRow label="信息源">
-          {tweet.feed === X_FORYOU_FEED ? 'X · For You（算法推荐）' : `X · @${tweet.feed}`}
+        <DetailRow label={t('detail.source')}>
+          {tweet.feed === X_FORYOU_FEED ? 'X · For You' : `X · @${tweet.feed}`}
         </DetailRow>
-        {tweet.created_at && <DetailRow label="发布时间">{fullDateLabel(tweet.created_at)}</DetailRow>}
-        {/* For You sorts on this, so it is the position you actually see it at. */}
-        <DetailRow label="抓取时间">{fullDateLabel(tweet.first_seen_at)}</DetailRow>
+        {tweet.created_at && <DetailRow label={t('detail.publishedAt')}>{fullDateLabel(tweet.created_at)}</DetailRow>}
+        <DetailRow label="Indexed">{fullDateLabel(tweet.first_seen_at)}</DetailRow>
         {m && (
-          <DetailRow label="互动">
-            {compactNumber(m.like_count)} 赞 · {compactNumber(m.retweet_count)} 转推 · {compactNumber(m.reply_count)}{' '}
-            回复
+          <DetailRow label="Engagement">
+            {compactNumber(m.like_count)} Likes · {compactNumber(m.retweet_count)} Reposts · {compactNumber(m.reply_count)} Replies
           </DetailRow>
         )}
-        {tweet.rt_of_handle && <DetailRow label="转推自">@{tweet.rt_of_handle}</DetailRow>}
-        {tweet.quote && <DetailRow label="引用">@{tweet.quote.author_handle ?? '未知'}</DetailRow>}
-        {tweet.reply_to_id && <DetailRow label="回复">该推文是一条回复</DetailRow>}
-        {tweet.media && tweet.media.length > 0 && <DetailRow label="媒体">{tweet.media.length} 项</DetailRow>}
-        {/* The reader's own label (Phase 3) — shown as a fact here; the card owns the
-            buttons. The reason chip rides along, since the card shows it nowhere: this
-            is where you check what a past self actually meant by that thumbs-down. */}
+        {tweet.rt_of_handle && <DetailRow label="Repost of">@{tweet.rt_of_handle}</DetailRow>}
+        {tweet.quote && <DetailRow label="Quote">@{tweet.quote.author_handle ?? t('common.unknown')}</DetailRow>}
+        {tweet.reply_to_id && <DetailRow label="Reply">This tweet is a reply</DetailRow>}
+        {tweet.media && tweet.media.length > 0 && (
+          <DetailRow label={t('detail.media')}>{t('detail.mediaCount', { count: tweet.media.length })}</DetailRow>
+        )}
         {item.feedback && (
-          <DetailRow label="反馈">
-            {item.feedback === 'up' ? '赞' : '踩'}
+          <DetailRow label="Feedback">
+            {item.feedback === 'up' ? 'Like' : 'Dislike'}
             {item.feedback_reason && ` · ${FEEDBACK_REASON_LABELS[item.feedback_reason]}`}
           </DetailRow>
         )}
         {tweet.verdict && (
-          <DetailRow label="判定">
+          <DetailRow label="Verdict">
             <XVerdictDetail verdict={tweet.verdict} meta={tweet.verdict_meta} />
           </DetailRow>
         )}
-        <DetailRow label="条目 ID">{item.key}</DetailRow>
+        <DetailRow label="ID">{item.key}</DetailRow>
       </dl>
     );
   }
@@ -121,27 +122,25 @@ export function ItemDetailInfo({ item, sub }: Props) {
   if (rss) {
     return (
       <dl className="space-y-1.5">
-        <DetailRow label="订阅源">
+        <DetailRow label={t('detail.feed')}>
           <span className="inline-flex min-w-0 items-center gap-1.5">
             <RssGlyph className="size-4" />
             <span className="truncate">{rssFeedLabel(rss.feed_url, rss.feed_title)}</span>
           </span>
         </DetailRow>
-        {rss.author && <DetailRow label="作者">{rss.author}</DetailRow>}
-        {rss.published_at && <DetailRow label="发布时间">{fullDateLabel(rss.published_at)}</DetailRow>}
-        {/* 抓取时间 is also the sort position whenever the feed declared none or
-            declared one we did not believe — so when the two differ, say which is which. */}
-        <DetailRow label="抓取时间">{fullDateLabel(rss.first_seen_at)}</DetailRow>
+        {rss.author && <DetailRow label={t('detail.author')}>{rss.author}</DetailRow>}
+        {rss.published_at && <DetailRow label={t('detail.publishedAt')}>{fullDateLabel(rss.published_at)}</DetailRow>}
+        <DetailRow label="Indexed">{fullDateLabel(rss.first_seen_at)}</DetailRow>
         {rss.published_at && rss.published_at !== item.datetime && (
-          <DetailRow label="排序时间">
+          <DetailRow label="Ordered">
             {fullDateLabel(item.datetime)}
-            <span className="text-muted-foreground"> · 源站声明的时间不可信，已按抓取时间排列</span>
+            <span className="text-muted-foreground"> · Sorted by indexed time</span>
           </DetailRow>
         )}
         <DetailRow label="Feed">
           <span className="break-all text-muted-foreground">{rss.feed_url}</span>
         </DetailRow>
-        <DetailRow label="条目 ID">{item.key}</DetailRow>
+        <DetailRow label="ID">{item.key}</DetailRow>
       </dl>
     );
   }
@@ -149,21 +148,19 @@ export function ItemDetailInfo({ item, sub }: Props) {
   if (!hn) return null;
   return (
     <dl className="space-y-1.5">
-      <DetailRow label="来源">
+      <DetailRow label={t('detail.source')}>
         <span className="inline-flex items-center gap-1.5">
           <HnGlyph className="size-4 text-[8px]" />
           <span>Hacker News</span>
-          {hn.type === 'job' && <span className="text-muted-foreground">(招聘)</span>}
+          {hn.type === 'job' && <span className="text-muted-foreground">(Job)</span>}
         </span>
       </DetailRow>
-      {hn.author && <DetailRow label="作者">{hn.author}</DetailRow>}
-      {hn.submitted_at && <DetailRow label="提交时间">{fullDateLabel(hn.submitted_at)}</DetailRow>}
-      <DetailRow label="上榜时间">{fullDateLabel(hn.first_seen_at)}</DetailRow>
-      {/* 上榜 ≠ 入选：前者是它出现在 HN 首页的时刻，后者是它够格进入时间线的时刻，
-          也是它在时间线上的位置。两者之间的间隔就是它挣到这个位置花的时间。 */}
-      {hn.qualified_at && <DetailRow label="入选时间">{fullDateLabel(hn.qualified_at)}</DetailRow>}
-      <DetailRow label="热度">
-        {hn.score} 分 ·{' '}
+      {hn.author && <DetailRow label={t('detail.author')}>{hn.author}</DetailRow>}
+      {hn.submitted_at && <DetailRow label="Submitted">{fullDateLabel(hn.submitted_at)}</DetailRow>}
+      <DetailRow label="Front page">{fullDateLabel(hn.first_seen_at)}</DetailRow>
+      {hn.qualified_at && <DetailRow label="Admitted">{fullDateLabel(hn.qualified_at)}</DetailRow>}
+      <DetailRow label={t('detail.score')}>
+        {hn.score} points ·{' '}
         <a
           href={hnCommentsUrl(hn.id)}
           target="_blank"
@@ -171,18 +168,18 @@ export function ItemDetailInfo({ item, sub }: Props) {
           {...hnLinkAttrs(hn)}
           className="hover:underline"
         >
-          {hn.comments_count} 条评论
+          {hn.comments_count} comments
         </a>
       </DetailRow>
       {(hn.day_rank != null || hn.peak_rank != null) && (
-        <DetailRow label="排名">
-          {hn.day_rank != null && <span>当日入选第 {hn.day_rank} 条</span>}
+        <DetailRow label="Rank">
+          {hn.day_rank != null && <span>Day #{hn.day_rank}</span>}
           {hn.day_rank != null && hn.peak_rank != null && <span aria-hidden> · </span>}
-          {hn.peak_rank != null && <span>首页峰值 #{hn.peak_rank}</span>}
+          {hn.peak_rank != null && <span>Peak #{hn.peak_rank}</span>}
         </DetailRow>
       )}
-      {hn.domain && <DetailRow label="域名">{hn.domain}</DetailRow>}
-      <DetailRow label="条目 ID">{item.key}</DetailRow>
+      {hn.domain && <DetailRow label="Domain">{hn.domain}</DetailRow>}
+      <DetailRow label="ID">{item.key}</DetailRow>
     </dl>
   );
 }

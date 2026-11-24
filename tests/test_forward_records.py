@@ -24,8 +24,8 @@ from datetime import datetime
 
 from fastapi.testclient import TestClient
 
-from condenser import db, forwards, search
-from condenser.app import create_app
+from tgfeed import db, forwards, search
+from tgfeed.app import create_app
 from tests.conftest import md, seed_channel, seed_messages
 from tests.test_forward_multi_source import STORY_ID, TWEET_ID, _armed, _login, seed_story, seed_tweet
 from tests.test_multi_source import seed_hn

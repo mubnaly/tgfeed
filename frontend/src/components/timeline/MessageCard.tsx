@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Bookmark, Forward } from 'lucide-react';
 
 import { ChannelAvatar } from '@/components/ChannelAvatar';
@@ -9,6 +9,7 @@ import { linkify } from '@/lib/linkify';
 import { useItemDetailPane } from '@/lib/itemDetailPane';
 import { useUnreadIndicator } from '@/lib/unreadIndicator';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
 import type { DisplayMessage, ReadTarget, TimelineItem } from '@/lib/types';
 
 import { AnnotationBadge } from './AnnotationBadge';
@@ -16,6 +17,7 @@ import { ForwardedBadge } from './ForwardedBadge';
 import { VibeReaderBadge } from './VibeReaderBadge';
 import { MessageMedia } from './MessageMedia';
 import { WebPagePreview } from './WebPagePreview';
+import { AiSummaryButton, SummaryBox, useItemSummary } from './AiSummaryAction';
 
 interface Props {
   /** Envelope with `telegram` present; read/saved flags live here, payload in `item.telegram`. */
@@ -33,9 +35,39 @@ function forwardSourceName(msg: DisplayMessage): string | null {
   return f?.from_channel_name || f?.from_user_name || f?.post_author || null;
 }
 
+function getTruncatedText(text: string, maxLen = 280, maxLines = 4): { isLong: boolean; preview: string } {
+  if (!text) return { isLong: false, preview: '' };
+  const lines = text.split('\n');
+  if (lines.length > maxLines) {
+    return { isLong: true, preview: lines.slice(0, maxLines).join('\n') };
+  }
+  if (text.length > maxLen) {
+    const cut = text.lastIndexOf(' ', maxLen);
+    const idx = cut > maxLen * 0.7 ? cut : maxLen;
+    return { isLong: true, preview: text.slice(0, idx) };
+  }
+  return { isLong: false, preview: text };
+}
+
 function MessageCardImpl({ item, channelLabel, observe, pendingKeys }: Props) {
+  const { t } = useI18n();
   const msg = item.telegram!;
   const save = useSaveToggle();
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { summary, isSummarizing, showSummary, summaryCached, summaryError, toggleOrSummarize } = useItemSummary(
+    item.key,
+    msg.summary,
+  );
+
+  const { isLong, preview } = useMemo(() => getTruncatedText(msg.text || ''), [msg.text]);
+
+  const handleSummaryClick = () => {
+    toggleOrSummarize({
+      text: msg.text || msg.webpage?.description || msg.webpage?.title || null,
+    });
+  };
+
   // Every link the text carries (the same set `linkify` renders) + the preview's,
   // for the Vibe Reader badge.
   const vrUrls = useMemo(() => {
@@ -62,8 +94,26 @@ function MessageCardImpl({ item, channelLabel, observe, pendingKeys }: Props) {
   // Text + media + webpage; reused inside the forward box or rendered bare otherwise.
   const body = (
     <>
+      <SummaryBox
+        show={showSummary}
+        isSummarizing={isSummarizing}
+        summary={summary}
+        cached={summaryCached}
+        error={summaryError}
+      />
       {msg.text && (
-        <div className="mt-1 text-sm leading-relaxed whitespace-pre-wrap break-words">{linkify(msg.text)}</div>
+        <div dir="auto" className="mt-1 text-sm leading-relaxed whitespace-pre-wrap break-words">
+          {linkify(isExpanded || !isLong ? msg.text : `${preview}… `)}
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="cursor-pointer font-medium text-emerald-600 hover:underline dark:text-emerald-400 ms-1 inline-block"
+            >
+              {isExpanded ? t('common.less') : t('common.more')}
+            </button>
+          )}
+        </div>
       )}
       <MessageMedia channelId={msg.channel_id} items={msg.media_items} />
       {msg.webpage && <WebPagePreview channelId={msg.channel_id} messageId={msg.id} webpage={msg.webpage} />}
@@ -88,14 +138,11 @@ function MessageCardImpl({ item, channelLabel, observe, pendingKeys }: Props) {
     >
       <header className="flex items-center gap-2 text-xs text-muted-foreground">
         <div className="relative flex items-center gap-2">
-          {/* Unread marker (dot mode): a sky dot floating in the left gutter, beside the
-              avatar (not inline with it); fades to transparent once the message is read.
-              Rendered only in dot mode so divider mode has no slot. */}
           {mode === 'dot' && (
             <span
               aria-hidden
               className={cn(
-                'absolute top-1/2 right-full mr-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
+                'absolute top-1/2 end-full me-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
                 isPending ? 'bg-emerald-500 dark:bg-emerald-400' : !item.is_read && 'bg-sky-500 dark:bg-sky-400',
               )}
             />
@@ -104,7 +151,6 @@ function MessageCardImpl({ item, channelLabel, observe, pendingKeys }: Props) {
           <span className="font-medium text-foreground/80">{channelLabel}</span>
         </div>
         <span aria-hidden>·</span>
-        {/* Unified pane entry: every message opens the item-detail drawer via its time. */}
         <button
           type="button"
           onClick={() => openPane(item)}
@@ -117,13 +163,20 @@ function MessageCardImpl({ item, channelLabel, observe, pendingKeys }: Props) {
         <ForwardedBadge item={item} />
         <AnnotationBadge item={item} />
         <VibeReaderBadge urls={vrUrls} />
+        <AiSummaryButton
+          onClick={handleSummaryClick}
+          active={Boolean(summary || showSummary)}
+          loading={isSummarizing}
+          title={summary ? t('summary.title') : t('summary.btn')}
+          className="ms-auto"
+        />
         <button
           type="button"
           onClick={() => save.mutate({ key: item.key, saved: !item.is_saved })}
           aria-label={item.is_saved ? 'Remove from saved' : 'Save'}
           aria-pressed={item.is_saved}
           className={cn(
-            'ml-auto rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
+            'rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
             item.is_saved ? 'text-amber-500' : 'text-muted-foreground',
           )}
         >

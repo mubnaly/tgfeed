@@ -32,8 +32,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db, verdict, x
-from condenser.app import create_app
+from tgfeed import db, verdict, x
+from tgfeed.app import create_app
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'x'
 
@@ -53,7 +53,7 @@ def xa_env(env, monkeypatch):
     """Fixed clock via ``x._now``; the startup cleanup round is kept away from the
     fixtures (the retention sweep reads the real clock)."""
     monkeypatch.setenv('CONDENSER_CLEANUP_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     monkeypatch.setattr(x, '_now', lambda: NOW)

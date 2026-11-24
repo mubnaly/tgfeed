@@ -29,9 +29,9 @@ import json
 import os
 from datetime import datetime, timedelta
 
-from condenser import attributes as attrs, db, verdict as verdict_mod, x
-from condenser.config import get_settings
-from condenser.items import x_key
+from tgfeed import attributes as attrs, db, verdict as verdict_mod, x
+from tgfeed.config import get_settings
+from tgfeed.items import x_key
 from telememo import db as tdb
 
 NOW = datetime(2026, 7, 28, 12, 0)

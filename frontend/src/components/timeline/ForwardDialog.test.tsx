@@ -47,9 +47,9 @@ describe('ForwardDialog', () => {
 
   it('shows the hint copy and both actions', () => {
     renderDialog();
-    expect(screen.getByText(/写上自己的看法/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '取消' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '确认转发' })).toBeInTheDocument();
+    expect(screen.getByText(/Adding commentary/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Forward' })).toBeInTheDocument();
   });
 
   it('sends the trimmed comment and closes with a toast on success', async () => {
@@ -57,8 +57,8 @@ describe('ForwardDialog', () => {
     const { onOpenChange } = renderDialog();
     const user = userEvent.setup();
 
-    await user.type(screen.getByPlaceholderText(/留空则原样转发/), '值得一读');
-    await user.click(screen.getByRole('button', { name: '确认转发' }));
+    await user.type(screen.getByPlaceholderText(/Leave empty to forward directly/), '值得一读');
+    await user.click(screen.getByRole('button', { name: 'Forward' }));
 
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
     expect(forwardItem).toHaveBeenCalledWith('tg:1:2', '值得一读');
@@ -69,7 +69,7 @@ describe('ForwardDialog', () => {
     forwardItem.mockResolvedValue(ok('forward'));
     const { onOpenChange } = renderDialog();
 
-    await userEvent.setup().click(screen.getByRole('button', { name: '确认转发' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Forward' }));
 
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
     expect(forwardItem).toHaveBeenCalledWith('tg:1:2', undefined);
@@ -80,8 +80,8 @@ describe('ForwardDialog', () => {
     renderDialog();
     const user = userEvent.setup();
 
-    await user.type(screen.getByPlaceholderText(/留空则原样转发/), '   ');
-    await user.click(screen.getByRole('button', { name: '确认转发' }));
+    await user.type(screen.getByPlaceholderText(/Leave empty to forward directly/), '   ');
+    await user.click(screen.getByRole('button', { name: 'Forward' }));
 
     await waitFor(() => expect(forwardItem).toHaveBeenCalledWith('tg:1:2', undefined));
   });
@@ -89,7 +89,7 @@ describe('ForwardDialog', () => {
   it('cancel closes without calling the API', async () => {
     const { onOpenChange } = renderDialog();
 
-    await userEvent.setup().click(screen.getByRole('button', { name: '取消' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(forwardItem).not.toHaveBeenCalled();
@@ -100,11 +100,10 @@ describe('ForwardDialog', () => {
     renderDialog(item('hn', 'hn:101'));
     const user = userEvent.setup();
 
-    // "留空则原样转发" would be a lie: HN has no Telegram original to forward.
-    expect(screen.getByPlaceholderText(/留空则只发标题和链接/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Leave empty to post title and link only/)).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText(/留空则只发标题和链接/), '值得一读');
-    await user.click(screen.getByRole('button', { name: '确认转发' }));
+    await user.type(screen.getByPlaceholderText(/Leave empty to post title and link only/), '值得一读');
+    await user.click(screen.getByRole('button', { name: 'Forward' }));
 
     await waitFor(() => expect(forwardItem).toHaveBeenCalledWith('hn:101', '值得一读'));
   });

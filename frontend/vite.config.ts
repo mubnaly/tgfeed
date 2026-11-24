@@ -43,7 +43,7 @@ export default defineConfig({
     allowedHosts: ['condenser.reorx.com'],
     proxy: {
       '/api': {
-        target: process.env.CONDENSER_BACKEND ?? 'http://localhost:8792',
+        target: process.env.TGFEED_BACKEND ?? process.env.CONDENSER_BACKEND ?? 'http://localhost:8792',
         changeOrigin: true,
       },
     },

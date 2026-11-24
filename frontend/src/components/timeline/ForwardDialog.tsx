@@ -6,6 +6,7 @@ import { Spinner } from '@/components/Spinner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useI18n } from '@/i18n';
 import { api, errorMessage } from '@/lib/api';
 import { patchItem } from '@/lib/itemCaches';
 import type { TimelineItem } from '@/lib/types';
@@ -14,47 +15,36 @@ interface ForwardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: TimelineItem;
-  /** Prefill for the comment box — the 条目评论「保存并转发」chain hands the just-saved
-   *  note over. Editing it here changes only the outgoing message, never the note
-   *  (which is already persisted by the time this dialog opens — iOS's rule). */
   initialComment?: string;
 }
 
-/** 转发到 app_meta.forward_channel 配置的频道。Telegram 条目：评论非空 → 文字 + t.me 链接
- *  的新消息，留空 → 原生 forward。其他信源没有「原生转发」这回事，服务端把标题和链接渲染成
- *  一条新消息，留空就是只发这条，不加评论。 */
 export function ForwardDialog({ open, onOpenChange, item, initialComment }: ForwardDialogProps) {
+  const { t } = useI18n();
   const [comment, setComment] = useState('');
   const isTelegram = item.source === 'telegram';
   const qc = useQueryClient();
 
-  // Seed the box on open; a plain open (no prefill) starts empty as before.
   useEffect(() => {
     if (open) setComment(initialComment ?? '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, initialComment]);
 
   const forward = useMutation({
     mutationFn: () => api.forwardItem(item.key, comment.trim() || undefined),
     onSuccess: (res) => {
       setComment('');
       onOpenChange(false);
-      const openAction = { label: '打开', onClick: () => window.open(res.link, '_blank') };
-      // recorded=false：消息发出去了，但服务端没能落下那行记录（依然 200 —— 重试会发
-      // 第二条）。此时角标不能亮：它下一次刷新就会无声熄灭，评论也不在 /forwards 里。
+      const openAction = { label: t('common.open'), onClick: () => window.open(res.link, '_blank') };
       if (res.recorded === false) {
-        toast.warning('已发送，但本地转发记录保存失败', { action: openAction });
+        toast.warning('Sent, but local forward record failed to save', { action: openAction });
         return;
       }
-      // 服务端已经落了一行记录（schema v17）：角标立刻亮，转发列表下次打开是新的。
-      // 这个 patch 只会把 false 改成 true，所以不需要回滚 —— 发送已经成功了。
       patchItem(qc, item.key, { forwarded_by_me: true });
       void qc.invalidateQueries({ queryKey: ['forwards'] });
-      toast.success(res.mode === 'quote' ? '已发布带评论的新消息' : '已转发到你的频道', {
+      toast.success(res.mode === 'quote' ? 'Posted message with commentary' : 'Forwarded to your channel', {
         action: openAction,
       });
     },
-    onError: (e) => toast.error(errorMessage(e, '转发失败')),
+    onError: (e) => toast.error(errorMessage(e, t('forward.error'))),
   });
 
   return (
@@ -70,11 +60,11 @@ export function ForwardDialog({ open, onOpenChange, item, initialComment }: Forw
     >
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>转发到我的频道</DialogTitle>
+          <DialogTitle>{t('forward.title')}</DialogTitle>
           <DialogDescription>
             {isTelegram
-              ? '写上自己的看法会通过文字 + 链接引用的形式发布新消息。'
-              : '写上自己的看法会和标题、链接一起发布成一条新消息。'}
+              ? 'Adding commentary will post a new message with text and quoted link.'
+              : 'Adding commentary will post a new message with your text, title, and link.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -82,15 +72,15 @@ export function ForwardDialog({ open, onOpenChange, item, initialComment }: Forw
           <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={isTelegram ? '留空则原样转发…' : '留空则只发标题和链接…'}
+            placeholder={isTelegram ? 'Leave empty to forward directly…' : 'Leave empty to post title and link only…'}
             autoFocus
           />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={forward.isPending}>
-              取消
+              {t('common.cancel')}
             </Button>
             <Button onClick={() => forward.mutate()} disabled={forward.isPending}>
-              {forward.isPending ? <Spinner /> : '确认转发'}
+              {forward.isPending ? <Spinner /> : t('forward.send')}
             </Button>
           </div>
         </div>

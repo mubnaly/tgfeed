@@ -13,6 +13,7 @@ import { Bookmark } from 'lucide-react';
 
 import { RssGlyph } from '@/components/RssGlyph';
 import { useSaveToggle } from '@/hooks/useSaveToggle';
+import { useI18n } from '@/i18n';
 import { fullDateLabel, timeLabel } from '@/lib/format';
 import { useItemDetailPane } from '@/lib/itemDetailPane';
 import { rssFeedLabel } from '@/lib/sources';
@@ -20,10 +21,10 @@ import { useUnreadIndicator } from '@/lib/unreadIndicator';
 import { cn } from '@/lib/utils';
 import type { ReadTarget, TimelineItem } from '@/lib/types';
 
-import { AiSummaryBlock, displaySummary } from './AiSummaryBlock';
 import { AnnotationBadge } from './AnnotationBadge';
 import { ForwardedBadge } from './ForwardedBadge';
 import { VibeReaderBadge } from './VibeReaderBadge';
+import { AiSummaryButton, SummaryBox, useItemSummary } from './AiSummaryAction';
 
 interface Props {
   /** Envelope with `rss` present. */
@@ -35,11 +36,24 @@ interface Props {
 }
 
 function RssCardImpl({ item, observe, pendingKeys }: Props) {
+  const { t } = useI18n();
   const rss = item.rss!;
   const save = useSaveToggle();
   const vrUrls = useMemo(() => (rss.link ? [rss.link] : []), [rss.link]);
   const { mode } = useUnreadIndicator();
   const { open, openPane } = useItemDetailPane();
+
+  const { summary, isSummarizing, showSummary, summaryCached, summaryError, toggleOrSummarize } = useItemSummary(
+    item.key,
+    rss.summary,
+  );
+
+  const handleSummaryClick = () => {
+    toggleOrSummarize({
+      title: rss.title,
+      text: rss.content_excerpt,
+    });
+  };
 
   const attach = useCallback(
     (el: HTMLElement | null) => {
@@ -58,12 +72,12 @@ function RssCardImpl({ item, observe, pendingKeys }: Props) {
   const shown = rss.published_at ?? item.datetime;
   const timeTitle =
     rss.published_at && rss.published_at !== item.datetime
-      ? `${fullDateLabel(rss.published_at)} · 时间线位置 ${fullDateLabel(item.datetime)}`
+      ? `${fullDateLabel(rss.published_at)} · ${fullDateLabel(item.datetime)}`
       : fullDateLabel(item.datetime);
   // 「查看全文」 is offered on the server's word (`content_truncated`) when the card
   // shows the excerpt; a summary hides the excerpt entirely, so with one the entry
   // to the source text is always offered.
-  const hasSummary = displaySummary(rss.summary) != null;
+  const hasSummary = Boolean(summary?.trim());
   const hasMore = hasSummary ? true : rss.content_truncated;
 
   return (
@@ -88,7 +102,7 @@ function RssCardImpl({ item, observe, pendingKeys }: Props) {
             <span
               aria-hidden
               className={cn(
-                'absolute top-1/2 right-full mr-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
+                'absolute top-1/2 end-full me-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
                 isPending ? 'bg-emerald-500 dark:bg-emerald-400' : !item.is_read && 'bg-sky-500 dark:bg-sky-400',
               )}
             />
@@ -110,13 +124,20 @@ function RssCardImpl({ item, observe, pendingKeys }: Props) {
         <ForwardedBadge item={item} />
         <AnnotationBadge item={item} />
         <VibeReaderBadge urls={vrUrls} />
+        <AiSummaryButton
+          onClick={handleSummaryClick}
+          active={Boolean(summary || showSummary)}
+          loading={isSummarizing}
+          title={summary ? t('summary.title') : t('summary.btn')}
+          className="ms-auto"
+        />
         <button
           type="button"
           onClick={() => save.mutate({ key: item.key, saved: !item.is_saved })}
           aria-label={item.is_saved ? 'Remove from saved' : 'Save'}
           aria-pressed={item.is_saved}
           className={cn(
-            'ml-auto shrink-0 rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
+            'shrink-0 rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
             item.is_saved ? 'text-amber-500' : 'text-muted-foreground',
           )}
         >
@@ -129,23 +150,28 @@ function RssCardImpl({ item, observe, pendingKeys }: Props) {
           href={rss.link}
           target="_blank"
           rel="noreferrer"
+          dir="auto"
           className="mt-1 block text-sm leading-relaxed font-medium break-words hover:underline"
         >
           {rss.title || rss.link}
         </a>
       ) : (
         // A feed that carries the whole post and nothing to point at.
-        <p className="mt-1 text-sm leading-relaxed font-medium break-words">{rss.title || '(untitled)'}</p>
+        <p dir="auto" className="mt-1 text-sm leading-relaxed font-medium break-words">{rss.title || '(untitled)'}</p>
       )}
 
-      {hasSummary ? (
-        <AiSummaryBlock summary={rss.summary} className="mt-1.5" />
-      ) : (
-        rss.content_excerpt && (
-          <p className="mt-1 line-clamp-5 text-sm leading-relaxed break-words text-foreground/90">
-            {rss.content_excerpt}
-          </p>
-        )
+      <SummaryBox
+        show={showSummary}
+        isSummarizing={isSummarizing}
+        summary={summary}
+        cached={summaryCached}
+        error={summaryError}
+      />
+
+      {!showSummary && rss.content_excerpt && (
+        <p dir="auto" className="mt-1 line-clamp-5 text-sm leading-relaxed break-words text-foreground/90">
+          {rss.content_excerpt}
+        </p>
       )}
 
       {hasMore && (
@@ -155,12 +181,12 @@ function RssCardImpl({ item, observe, pendingKeys }: Props) {
             onClick={() => openPane(item)}
             className="text-xs font-medium text-sky-600 hover:underline dark:text-sky-400"
           >
-            查看全文
+            {t('detail.readMore')}
           </button>
         </div>
       )}
 
-      {rss.author && <div className="mt-1 truncate text-xs text-muted-foreground">{rss.author}</div>}
+      {rss.author && <div dir="auto" className="mt-1 truncate text-xs text-muted-foreground">{rss.author}</div>}
     </article>
   );
 }

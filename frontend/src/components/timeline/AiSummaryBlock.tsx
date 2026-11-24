@@ -32,19 +32,18 @@ export function AiSummaryBlock({ summary, className }: Props) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-lg bg-indigo-500/[0.07] py-2 pr-2.5 pl-[13px] dark:bg-indigo-400/10',
+        'relative overflow-hidden rounded-lg bg-indigo-500/[0.07] py-2 pe-2.5 ps-[13px] dark:bg-indigo-400/10',
         // The bar is a straight 3px rectangle *clipped* by the block's rounded
-        // corners, as on iOS. A `border-l` would instead bend around the radius
-        // and taper to a point at both ends — a bracket, not a bar.
-        'before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-indigo-500/55 dark:before:bg-indigo-400/55',
+        // corners, as on iOS.
+        'before:absolute before:inset-y-0 before:start-0 before:w-[3px] before:bg-indigo-500/55 dark:before:bg-indigo-400/55',
         className,
       )}
     >
       <div className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
         <Sparkles className="size-3.5" aria-hidden />
-        AI 摘要
+        AI Summary
       </div>
-      <p className="mt-1.5 text-sm leading-relaxed break-words text-foreground/90">{text}</p>
+      <p dir="auto" className="mt-1.5 text-sm leading-relaxed break-words text-foreground/90">{text}</p>
     </div>
   );
 }

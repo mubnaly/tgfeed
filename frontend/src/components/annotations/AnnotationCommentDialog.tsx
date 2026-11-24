@@ -36,7 +36,7 @@ export function AnnotationCommentDialog({ annotation, onClose, onSave }: Props) 
       await onSave(text.trim());
       onClose();
     } catch (e) {
-      toast.error(errorMessage(e, '评论保存失败，请重试'));
+      toast.error(errorMessage(e, 'Failed to save comment, please retry'));
     } finally {
       setSaving(false);
     }
@@ -46,8 +46,8 @@ export function AnnotationCommentDialog({ annotation, onClose, onSave }: Props) 
     <Dialog open={!!annotation} onOpenChange={(next) => !next && !saving && onClose()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>高亮评论</DialogTitle>
-          <DialogDescription>对这段高亮写下你的看法。</DialogDescription>
+          <DialogTitle>Highlight Comment</DialogTitle>
+          <DialogDescription>Add your notes or commentary on this highlight.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <blockquote className="line-clamp-4 rounded-md bg-yellow-400/15 px-3 py-2 text-sm leading-relaxed text-foreground/90">
@@ -56,16 +56,16 @@ export function AnnotationCommentDialog({ annotation, onClose, onSave }: Props) 
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={annotation?.comment ? '清空保存 = 删除评论（高亮保留）' : '对这段高亮写点什么…'}
+            placeholder={annotation?.comment ? 'Clear and save to delete comment (highlight remains)' : 'Write a comment on this highlight...'}
             autoFocus
             className="min-h-24"
           />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={saving}>
-              取消
+              Cancel
             </Button>
             <Button onClick={save} disabled={saving}>
-              {saving ? <Spinner /> : '确认'}
+              {saving ? <Spinner /> : 'Save'}
             </Button>
           </div>
         </div>

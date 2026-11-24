@@ -13,7 +13,7 @@ describe('X aggregate modes', () => {
 
   it('falls back to the raw value for a mode it has no label for', () => {
     expect(xAggregateLabel('following', 'positive')).toBe('positive');
-    expect(xAggregateLabel('foryou', 'positive')).toBe('只进推荐的');
+    expect(xAggregateLabel('foryou', 'positive')).toBe('Recommended only');
   });
 });
 

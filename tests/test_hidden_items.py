@@ -8,8 +8,8 @@ client-side logic. Saved records are user assets and keep hidden items.
 
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
+from tgfeed import db
+from tgfeed.app import create_app
 from tests.conftest import md, seed_channel, seed_messages
 from tests.test_multi_source import seed_hn, subscribe_hn
 

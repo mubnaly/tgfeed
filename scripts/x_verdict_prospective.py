@@ -51,9 +51,9 @@ from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from condenser import db, prospective  # noqa: E402
-from condenser.config import get_settings  # noqa: E402
-from condenser.prospective import Pair, Side  # noqa: E402
+from tgfeed import db, prospective  # noqa: E402
+from tgfeed.config import get_settings  # noqa: E402
+from tgfeed.prospective import Pair, Side  # noqa: E402
 
 VERDICTS = ('positive', 'neutral', 'negative')
 LABELS = ('up', 'save', 'down')

@@ -40,13 +40,11 @@ const ARTICLE_PROSE = cn(
   // body or an X long-form post, which leans on `##` sections) needs them back.
   '[&_h1]:mt-4 [&_h1]:text-base [&_h1]:font-semibold [&_h2]:mt-4 [&_h2]:text-base [&_h2]:font-semibold',
   '[&_h3]:mt-3 [&_h3]:font-semibold [&_h4]:mt-3 [&_h4]:font-semibold [&_:is(h1,h2,h3,h4):first-child]:mt-0',
-  '[&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5',
-  '[&_blockquote]:mt-2 [&_blockquote]:border-l-2 [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground',
+  '[&_ul]:mt-2 [&_ul]:list-disc [&_ul]:ps-5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:ps-5',
+  '[&_blockquote]:mt-2 [&_blockquote]:border-s-2 [&_blockquote]:ps-3 [&_blockquote]:text-muted-foreground',
   // Feed bodies carry full-resolution images; capped rather than dropped — the
-  // original is one click away. `object-contain` because a sized `<img>` (the X
-  // renderer puts width/height on each, so the space is reserved before load)
-  // would otherwise be squashed when the height cap bites.
-  '[&_img]:mt-2 [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded [&_img]:object-contain [&_img]:object-left',
+  // original is one click away.
+  '[&_img]:mt-2 [&_img]:max-h-80 [&_img]:max-w-full [&_img]:rounded [&_img]:object-contain',
   '[&_figure]:mt-3 [&_figure:first-child]:mt-0 [&_figure_img]:mt-0',
   '[&_figcaption]:mt-1 [&_figcaption]:text-xs [&_figcaption]:text-muted-foreground',
 );
@@ -77,6 +75,7 @@ function RssDetailBody({ item, annotations }: Props) {
           onDelete={annotations.remove}
         >
           <div
+            dir="auto"
             className={ARTICLE_PROSE}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
@@ -84,16 +83,16 @@ function RssDetailBody({ item, annotations }: Props) {
         </AnnotatedText>
       ) : (
         <>
-          {entry.content_excerpt && <p className={PLAIN_PROSE}>{entry.content_excerpt}</p>}
+          {entry.content_excerpt && <p dir="auto" className={PLAIN_PROSE}>{entry.content_excerpt}</p>}
           {loading ? (
             <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Spinner className="size-3" />
-              正在加载全文…
+              Loading full text...
             </div>
           ) : (
             // A failed fetch keeps the excerpt — still a true rendering of the
             // entry, just a short one.
-            article.isError && <p className="mt-2 text-xs text-muted-foreground">正文加载失败</p>
+            article.isError && <p className="mt-2 text-xs text-muted-foreground">Failed to load article</p>
           )}
         </>
       )}
@@ -109,8 +108,8 @@ function RssDetailBody({ item, annotations }: Props) {
  * body the list promised (`has_content`) earns the loading line, though. And its
  * images are on pbs.twimg.com, so they go through the proxy like every other tweet
  * image. Until the body is in hand the preview stands in; once the server has
- * answered without one, a line says so (「未获取到 article 正文」 — the probe's
- * miss), which is a different thing from the request itself failing. */
+ * answered without one, a line says so — the probe's miss, which is a different
+ * thing from the request itself failing. */
 function XArticleDetailBody({ item, annotations }: Props) {
   const tweet = item.x!;
   const listed = tweet.article!;
@@ -121,7 +120,7 @@ function XArticleDetailBody({ item, annotations }: Props) {
 
   return (
     <div>
-      <h2 className="mb-2 text-base leading-snug font-semibold break-words">{listed.title}</h2>
+      <h2 dir="auto" className="mb-2 text-base leading-snug font-semibold break-words">{listed.title}</h2>
       {html ? (
         <AnnotatedText
           annotations={annotations.annotations}
@@ -130,6 +129,7 @@ function XArticleDetailBody({ item, annotations }: Props) {
           onDelete={annotations.remove}
         >
           <div
+            dir="auto"
             className={ARTICLE_PROSE}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: proxyImages(sanitizeHtml(html)) }}
@@ -137,20 +137,20 @@ function XArticleDetailBody({ item, annotations }: Props) {
         </AnnotatedText>
       ) : (
         <>
-          {listed.previewText && <p className={PLAIN_PROSE}>{listed.previewText}</p>}
+          {listed.previewText && <p dir="auto" className={PLAIN_PROSE}>{listed.previewText}</p>}
           {article.isPending ? (
             promised && (
               <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Spinner className="size-3" />
-                正在加载全文…
+                Loading full text...
               </div>
             )
           ) : article.isError ? (
             // Only a promised body failed to *load*; for one the list already said
             // was missing, the failed request changes nothing about that.
-            <p className="mt-2 text-xs text-muted-foreground">{promised ? '正文加载失败' : '未获取到 article 正文'}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{promised ? 'Failed to load article' : 'Article content unavailable'}</p>
           ) : (
-            <p className="mt-2 text-xs text-muted-foreground">未获取到 article 正文</p>
+            <p className="mt-2 text-xs text-muted-foreground">Article content unavailable</p>
           )}
         </>
       )}
@@ -186,15 +186,16 @@ export function ItemDetailBody({ item, annotations }: Props) {
   const tweet = item.x;
   const xText = tweet ? xBodyText(tweet) : null;
   const content = msg?.text ? (
-    <div className={PLAIN_PROSE}>{linkify(msg.text)}</div>
+    <div dir="auto" className={PLAIN_PROSE}>{linkify(msg.text)}</div>
   ) : hn?.text ? (
     <div
+      dir="auto"
       className={ARTICLE_PROSE}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: sanitizeHtml(hn.text) }}
     />
   ) : tweet && xText ? (
-    <div className={PLAIN_PROSE}>{linkify(xText, tweet.urls)}</div>
+    <div dir="auto" className={PLAIN_PROSE}>{linkify(xText, tweet.urls)}</div>
   ) : null;
 
   // An HN story's summary sits above its body and outside `AnnotatedText` (iOS

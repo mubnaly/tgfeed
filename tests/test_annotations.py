@@ -17,9 +17,9 @@ import sqlite3
 
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
-from condenser.items import tg_key
+from tgfeed import db
+from tgfeed.app import create_app
+from tgfeed.items import tg_key
 from tests.conftest import md, seed_channel, seed_messages
 
 CHANNEL = 100

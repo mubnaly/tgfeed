@@ -32,14 +32,14 @@ export function XAggregateMenu({ feed, mode }: { feed: string; mode: XAggregateM
           size="sm"
           className="h-8 gap-1 px-2 text-xs text-muted-foreground"
           disabled={setMode.isPending}
-          title={`${xFeedLabel(feed)} 有多少并入主时间线`}
+          title={`${xFeedLabel(feed)} timeline aggregate mode`}
         >
           {xAggregateLabel(feed, mode)}
           <ChevronDown className="size-3.5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-w-72">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">并入主时间线</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs text-muted-foreground">Main Timeline Inclusion</DropdownMenuLabel>
         {xAggregateModes(feed).map((m) => (
           <DropdownMenuItem
             key={m.value}

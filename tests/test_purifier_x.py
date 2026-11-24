@@ -15,8 +15,8 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import purifier, purifier_x
-from condenser.app import create_app
+from tgfeed import purifier, purifier_x
+from tgfeed.app import create_app
 
 OWN = 'https://condenser.example'
 FIXTURES = Path(__file__).parent / 'fixtures' / 'x_fxembed'
@@ -27,7 +27,7 @@ def _load(name: str) -> dict:
 
 
 def _settings(**overrides):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     s = get_settings()
     for k, v in overrides.items():
@@ -252,9 +252,9 @@ async def test_handler_off_leaves_render_document_on_the_ordinary_path(env):
 @pytest.mark.parametrize(
     ('http_status', 'payload', 'needle'),
     [
-        (404, {'code': 404, 'status': None, 'thread': None, 'replies': None}, '删除'),
+        (404, {'code': 404, 'status': None, 'thread': None, 'replies': None}, 'deleted'),
         # the verdict lives in the body: FxEmbed can say 401 under an HTTP 200
-        (200, {'code': 401, 'message': 'PRIVATE_TWEET'}, '受保护'),
+        (200, {'code': 401, 'message': 'PRIVATE_TWEET'}, 'protected'),
         (403, None, '403'),  # Cloudflare's challenge page, not JSON at all
         (503, {'code': 500, 'message': 'API_FAIL'}, '500'),
     ],
@@ -289,8 +289,8 @@ async def test_failures_are_not_cached(env):
 async def test_page_shell_title_toolbar_and_no_full_page_link(env):
     html = (await _render('x.com', '/derbederdusler/status/1770888775830262034', _load('reply'))).html
     assert '<title>𝕯𝖊𝖗𝖇𝖊𝖉𝖊𝖗 @derbederdusler</title>' in html
-    assert 'href="https://x.com/derbederdusler/status/1770888775830262034"' in html  # 原网页
-    assert '推文' in _section(html, 'cd-purifier-bar', '</div>')
+    assert 'href="https://x.com/derbederdusler/status/1770888775830262034"' in html  # original link
+    assert 'Tweet' in _section(html, 'cd-purifier-bar', '</div>')
     assert '_mode=proxy' not in html and '整页 →' not in html
     assert '<script' not in html
 
@@ -350,7 +350,7 @@ async def test_deleted_quote_is_a_tombstone_not_a_crash(env):
         'message': 'This post was deleted by the post author.',
     }
     html = (await _render('x.com', '/novoreorx/status/2079732304914862528', data)).html
-    assert 'cd-x-tombstone' in html and '已被删除' in html
+    assert 'cd-x-tombstone' in html and 'deleted' in html
 
 
 async def test_video_is_a_proxied_poster_linking_to_a_playable_file(env):
@@ -477,7 +477,7 @@ async def test_text_from_the_api_is_escaped_and_script_urls_are_not_linked(env):
 
 
 def _install(monkeypatch, fetch_x=None, fetch_page=None):
-    from condenser.routers import purifier as router
+    from tgfeed.routers import purifier as router
 
     if fetch_x is not None:
         monkeypatch.setattr(router, '_fetch_x', fetch_x)
@@ -524,7 +524,7 @@ def test_switched_off_the_route_sends_the_reader_to_the_original_link(env, monke
     fact about URL shapes, so a status link can still arrive here (from a page, or from
     the iOS app); readable mode would only scrape x.com's empty shell, so it is sent on."""
     monkeypatch.setenv('CONDENSER_PURIFIER_X_API_BASE', '')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     _install(monkeypatch)

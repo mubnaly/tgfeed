@@ -7,8 +7,8 @@ import hashlib
 
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
+from tgfeed import db
+from tgfeed.app import create_app
 
 
 def _client():

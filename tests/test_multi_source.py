@@ -14,9 +14,9 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
-from condenser.items import hn_key, parse_key, rss_key, tg_key
+from tgfeed import db
+from tgfeed.app import create_app
+from tgfeed.items import hn_key, parse_key, rss_key, tg_key
 from tests.conftest import BASE, md, seed_channel, seed_messages
 
 
@@ -477,7 +477,7 @@ def test_timeline_new_composite_head_poll(env):
 
         # one new item per source arrives
         seed_messages([md(1, 11, 10)])
-        from condenser import filters
+        from tgfeed import filters
 
         filters.recompute_messages(1, [11])
         seed_hn(102, 11)

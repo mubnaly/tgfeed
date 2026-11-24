@@ -37,7 +37,7 @@ describe('XLangFilterToggle', () => {
   it('turns the filter on through the subscription config', async () => {
     wrap(<XLangFilterToggle feed="foryou" enabled={false} />);
 
-    await userEvent.click(screen.getByText('语言过滤关'));
+    await userEvent.click(screen.getByText('Language filter off'));
 
     await waitFor(() => expect(api.xSetConfig).toHaveBeenCalledWith('foryou', { lang_filter: true }));
   });
@@ -46,7 +46,7 @@ describe('XLangFilterToggle', () => {
     wrap(<XLangFilterToggle feed="foryou" enabled={true} />);
 
     // findBy: until app-meta resolves the button shows the pick-languages hint
-    await userEvent.click(await screen.findByText('按语言过滤'));
+    await userEvent.click(await screen.findByText('Filter by language'));
 
     await waitFor(() => expect(api.xSetConfig).toHaveBeenCalledWith('foryou', { lang_filter: false }));
   });
@@ -58,6 +58,6 @@ describe('XLangFilterToggle', () => {
 
     wrap(<XLangFilterToggle feed="foryou" enabled={true} />);
 
-    expect(await screen.findByText('先在设置中选择语言')).toBeInTheDocument();
+    expect(await screen.findByText('Select languages in Settings')).toBeInTheDocument();
   });
 });

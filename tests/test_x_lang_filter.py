@@ -17,8 +17,8 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
-from condenser import db, x
-from condenser.app import create_app
+from tgfeed import db, x
+from tgfeed.app import create_app
 
 
 def _client():

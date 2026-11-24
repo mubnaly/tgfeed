@@ -11,6 +11,7 @@ import { Toaster } from './components/ui/sonner';
 import { initPwaWindow } from './lib/pwa';
 import { setupUpdatePrompt } from './lib/swUpdate';
 import { queryClient } from './lib/queryClient';
+import { I18nProvider } from './i18n';
 import { ThemeProvider } from './lib/theme';
 import { UnreadIndicatorProvider } from './lib/unreadIndicator';
 
@@ -29,25 +30,27 @@ initPwaWindow();
 setupUpdatePrompt({
   registerSW,
   showUpdateToast: (confirm) => {
-    toast('发现新版本', {
-      description: '点击更新以加载最新版本',
+    toast('Update Available', {
+      description: 'Click reload to update to the latest version.',
       duration: Infinity,
-      action: { label: '更新', onClick: confirm },
+      action: { label: 'Reload', onClick: confirm },
     });
   },
 });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <UnreadIndicatorProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <App />
-            <Toaster />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </UnreadIndicatorProvider>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider>
+        <UnreadIndicatorProvider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <App />
+              <Toaster />
+            </BrowserRouter>
+          </QueryClientProvider>
+        </UnreadIndicatorProvider>
+      </ThemeProvider>
+    </I18nProvider>
   </StrictMode>,
 );

@@ -24,11 +24,11 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db, search
-from condenser import summary as summary_mod
-from condenser.app import create_app
-from condenser.config import get_settings
-from condenser.items import parse_key
+from tgfeed import db, search
+from tgfeed import summary as summary_mod
+from tgfeed.app import create_app
+from tgfeed.config import get_settings
+from tgfeed.items import parse_key
 from tests.conftest import BASE
 
 FEED = 'https://a.example.com/feed.xml'
@@ -526,7 +526,7 @@ def test_a_poll_round_summarizes_what_it_ingested(summary_env, monkeypatch):
     """The pipeline hangs off the tail of a polling round rather than owning a loop
     of its own (plan §3): RSS content only arrives with a round, so there is nothing
     for a second timer to discover."""
-    from condenser.rss import RssManager
+    from tgfeed.rss import RssManager
 
     settings = configure(monkeypatch)
     xml = (
@@ -537,7 +537,7 @@ def test_a_poll_round_summarizes_what_it_ingested(summary_env, monkeypatch):
     ).encode()
 
     async def fetch(url, etag=None, last_modified=None):
-        from condenser.rss import FetchResult
+        from tgfeed.rss import FetchResult
 
         return FetchResult(status=200, body=xml)
 
@@ -556,7 +556,7 @@ def test_a_summary_failure_does_not_sink_the_polling_round(summary_env, monkeypa
     """Fetching is the source's job; summarizing is an extra. A pipeline that threw
     (a provider returning something unexpected, say) must not cost the round its
     ingest — the entries are already archived by then."""
-    from condenser.rss import RssManager
+    from tgfeed.rss import RssManager
 
     settings = configure(monkeypatch)
 
@@ -564,7 +564,7 @@ def test_a_summary_failure_does_not_sink_the_polling_round(summary_env, monkeypa
         raise RuntimeError('unexpected')
 
     async def fetch(url, etag=None, last_modified=None):
-        from condenser.rss import FetchResult
+        from tgfeed.rss import FetchResult
 
         return FetchResult(status=200, body=b'<rss version="2.0"><channel><title>A</title></channel></rss>')
 

@@ -53,7 +53,7 @@ describe('CreateFilterDialog', () => {
     renderDialog();
     expect(screen.getByText(/match whole words only/)).toBeInTheDocument();
     expect(screen.getByText(/arc\* also hides archive/)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('e.g. promo, arc*, 广告')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. promo, arc*, ad')).toBeInTheDocument();
   });
 
   it('swaps the keyword for the suggestion and waits for a fresh preview', async () => {

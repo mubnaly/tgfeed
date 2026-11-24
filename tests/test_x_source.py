@@ -16,8 +16,8 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from condenser import db, x
-from condenser.app import create_app
+from tgfeed import db, x
+from tgfeed.app import create_app
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'x'
 
@@ -366,7 +366,7 @@ def test_unsubscribe_keeps_the_archive(env):
 
 def test_source_disabled_by_config_refuses_subscribe_and_ingest(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_X_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     with _client() as client:

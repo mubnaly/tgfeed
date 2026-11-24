@@ -1,5 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0f172a"/>
-  <path d="M13 16.5 h38 a3.2 3.2 0 0 1 0 6.4 l-13 14.6 v10 h-12 v-10 l-13 -14.6 a3.2 3.2 0 0 1 0 -6.4 z" fill="#f1f5f9"/>
-  <circle cx="32" cy="53" r="4.5" fill="#38bdf8"/>
+  <defs>
+    <linearGradient id="nafi-bg" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#0f172a" />
+      <stop offset="100%" stopColor="#1e293b" />
+    </linearGradient>
+    <linearGradient id="nafi-leaf-left" x1="12" y1="14" x2="34" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#10b981" />
+      <stop offset="100%" stopColor="#047857" />
+    </linearGradient>
+    <linearGradient id="nafi-leaf-right" x1="52" y1="14" x2="30" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#06b6d4" />
+      <stop offset="100%" stopColor="#0d9488" />
+    </linearGradient>
+    <linearGradient id="nafi-spark" x1="32" y1="18" x2="32" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#fbbf24" />
+      <stop offset="100%" stopColor="#f59e0b" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#nafi-bg)" />
+  <rect width="62" height="62" x="1" y="1" rx="15" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+  <path d="M32 49 C23 45 15 36 15 25 C15 17 22 13 28 17 C32 20 32 28 32 35 Z" fill="url(#nafi-leaf-left)" fillOpacity="0.92" />
+  <path d="M32 49 C41 45 49 36 49 25 C49 17 42 13 36 17 C32 20 32 28 32 35 Z" fill="url(#nafi-leaf-right)" fillOpacity="0.92" />
+  <path d="M32 17 L36.5 28 L32 43 L27.5 28 Z" fill="url(#nafi-spark)" />
+  <circle cx="32" cy="13.5" r="2.2" fill="#fde68a" />
 </svg>

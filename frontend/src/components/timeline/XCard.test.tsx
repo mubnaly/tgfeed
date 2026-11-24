@@ -162,11 +162,11 @@ describe('XCard', () => {
     expect(screen.getByText('Superrepos')).toBeInTheDocument();
     expect(screen.getByText('Different workloads…')).toBeInTheDocument();
     // a payload without the flag (pre-v21) claims nothing either way
-    expect(screen.queryByRole('button', { name: '查看全文' })).toBeNull();
-    expect(screen.queryByText('未获取到正文')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Read full content' })).toBeNull();
+    expect(screen.queryByText('Article content unavailable')).toBeNull();
   });
 
-  it('says 未获取到正文 when the server has no body, as plain text rather than a button', () => {
+  it('says Article content unavailable when the server has no body, as plain text rather than a button', () => {
     // The probe reads the body with the tweet (plan 2026-09-17), so `has_content:
     // false` is no longer "on its way" but "the probe did not get it" — which the
     // reader should see while scanning, not discover by opening the pane.
@@ -179,9 +179,9 @@ describe('XCard', () => {
       />,
     );
 
-    expect(screen.getByText('未获取到正文')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '未获取到正文' })).toBeNull();
-    expect(screen.queryByRole('button', { name: '查看全文' })).toBeNull();
+    expect(screen.getByText('Article content unavailable')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Article content unavailable' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Read full content' })).toBeNull();
   });
 
   it('says nothing either way when the flag is null (a snapshot saved before the body existed)', () => {
@@ -193,11 +193,11 @@ describe('XCard', () => {
         })}
       />,
     );
-    expect(screen.queryByText('未获取到正文')).toBeNull();
-    expect(screen.queryByRole('button', { name: '查看全文' })).toBeNull();
+    expect(screen.queryByText('Article content unavailable')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Read full content' })).toBeNull();
   });
 
-  it('offers 查看全文 once the body exists, and opens the pane instead of expanding', async () => {
+  it('offers Read full content once the body exists, and opens the pane instead of expanding', async () => {
     // The body renders in the detail pane only — one rendering to highlight on,
     // RssCard's arrangement. The card itself never fetches it.
     wrap(
@@ -211,7 +211,7 @@ describe('XCard', () => {
         <OpenProbe />
       </ItemDetailPaneProvider>,
     );
-    await userEvent.setup().click(screen.getByRole('button', { name: '查看全文' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Read full content' }));
 
     expect(screen.getByTestId('open-key')).toHaveTextContent('x:2080526422410752155');
     expect(api.xTweet).not.toHaveBeenCalled();

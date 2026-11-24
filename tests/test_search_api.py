@@ -12,8 +12,8 @@ from datetime import timedelta
 
 from fastapi.testclient import TestClient
 
-from condenser import db, search, x
-from condenser.app import create_app
+from tgfeed import db, search, x
+from tgfeed.app import create_app
 from tests.conftest import BASE, md, seed_channel, seed_messages
 
 

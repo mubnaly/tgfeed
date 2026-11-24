@@ -154,7 +154,7 @@ describe('HnCard', () => {
   it('shows the AI summary under the title, and says that it is one', () => {
     wrap(<HnCard item={makeItem({ summary: '这篇文章讲了三件事。讨论主要在争论第二件。' })} />);
     expect(screen.getByText('这篇文章讲了三件事。讨论主要在争论第二件。')).toBeInTheDocument();
-    expect(screen.getByText('AI 摘要')).toBeInTheDocument();
+    expect(screen.getByText('AI Summary')).toBeInTheDocument();
     // Under the title, above the meta line: the reader decides from it whether to open.
     const title = screen.getByRole('link', { name: 'A story' });
     const summary = screen.getByText('这篇文章讲了三件事。讨论主要在争论第二件。');
@@ -163,19 +163,19 @@ describe('HnCard', () => {
     expect(summary.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     // The label leads the block (iOS `AiSummaryBlock`): "a machine wrote this"
     // is met before the words, not discovered under them.
-    const label = screen.getByText('AI 摘要');
+    const label = screen.getByText('AI Summary');
     expect(title.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(label.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('shows no summary block without one', () => {
     wrap(<HnCard item={makeItem()} />);
-    expect(screen.queryByText('AI 摘要')).toBeNull();
+    expect(screen.queryByText('AI Summary')).toBeNull();
   });
 
   it('treats a whitespace-only summary as none — no block, and the preview keeps its description', () => {
     wrap(<HnCard item={makeItem({ summary: '  \n', preview: makePreview() })} />);
-    expect(screen.queryByText('AI 摘要')).toBeNull();
+    expect(screen.queryByText('AI Summary')).toBeNull();
     expect(screen.getByText('Og description')).toBeInTheDocument();
   });
 
@@ -233,10 +233,10 @@ describe('HnCard', () => {
         expect(screen.queryByLabelText(/^Vibe Reader/)).toBeNull();
 
         fromBridge({ type: 'vibe-reader:status', url: 'https://example.com/post', state: 'generating' });
-        expect(screen.getByLabelText('Vibe Reader 正在生成')).toBeInTheDocument();
+        expect(screen.getByLabelText('Vibe Reader generating summary')).toBeInTheDocument();
 
         fromBridge({ type: 'vibe-reader:status', url: 'https://news.ycombinator.com/item?id=101', state: 'done' });
-        expect(screen.getByLabelText('Vibe Reader 已就绪')).toBeInTheDocument();
+        expect(screen.getByLabelText('Vibe Reader ready')).toBeInTheDocument();
       } finally {
         off();
       }

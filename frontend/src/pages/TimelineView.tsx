@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { CheckCheck, Inbox, RefreshCw, Send, Sparkles } from 'lucide-react';
-import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { ChannelAvatar } from '@/components/ChannelAvatar';
 import { ChannelFilter } from '@/components/ChannelFilter';
@@ -19,13 +19,19 @@ import { hnFeedRulesOf } from '@/hooks/useHnFeedRules';
 import { useRefreshAll, useRefreshChannel } from '@/hooks/useRefresh';
 import { useSources } from '@/hooks/useSources';
 import { useChannelLabels, useSubscriptions } from '@/hooks/useSubscriptions';
+import { useTgStatus } from '@/hooks/useTgStatus';
 import { useTimeline } from '@/hooks/useTimeline';
+import { useI18n } from '@/i18n';
 import { channelName } from '@/lib/format';
 import { isSource, isXSyntheticFeed, rssFeedLabel, sourceLabel, subRowLabel } from '@/lib/sources';
 import type { TimelineItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 export function TimelineView() {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const { data: tgStatus } = useTgStatus();
+  const isTgAuthorized = tgStatus?.status === 'authorized';
   const { channelId, source: sourceParam, feed: feedParam } = useParams();
   const [sp, setSp] = useSearchParams();
   const cid = channelId ? Number(channelId) : undefined;
@@ -205,6 +211,56 @@ export function TimelineView() {
           </>
         }
       />
+
+      {!isTgAuthorized && (
+        <div className="flex items-center justify-between gap-3 border-b bg-sky-500/10 px-4 py-2.5 text-xs text-sky-800 dark:text-sky-300">
+          <div className="flex items-center gap-2">
+            <Send className="size-4 shrink-0 text-sky-500" />
+            <span>{t('channels.connectBanner')}</span>
+          </div>
+          <Link
+            to="/connect-telegram"
+            className="shrink-0 rounded bg-sky-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-sky-600"
+          >
+            {t('channels.connectBtn')}
+          </Link>
+        </div>
+      )}
+
+      {subs && subs.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto border-b bg-muted/20 px-4 py-2 text-xs">
+          <span className="shrink-0 font-medium text-muted-foreground">{t('channels.filterBy')}</span>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className={cn(
+              'shrink-0 cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+              cid == null
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/80 text-foreground/80 hover:bg-accent',
+            )}
+          >
+            {t('channels.all')} ({subs.length})
+          </button>
+          {subs.map((s) => (
+            <button
+              key={s.channel_id}
+              type="button"
+              onClick={() => navigate(`/c/${s.channel_id}`)}
+              className={cn(
+                'flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                cid === s.channel_id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted/80 text-foreground/80 hover:bg-accent',
+              )}
+            >
+              <ChannelAvatar channelId={s.channel_id} name={s.title || ''} className="size-3.5 text-[8px]" />
+              <span className="max-w-[140px] truncate">{s.title || s.username || `Channel ${s.channel_id}`}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <Timeline
         query={query}
         viewKey={`${source ?? ''}/${feed ?? ''}:${cid ?? 'all'}:${unreadOnly ? 'unread' : 'all'}:${date ?? ''}`}

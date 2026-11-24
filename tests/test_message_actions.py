@@ -17,8 +17,8 @@ from telethon.tl.types import (
     ReactionPaid,
 )
 
-from condenser import db
-from condenser.app import create_app
+from tgfeed import db
+from tgfeed.app import create_app
 from tests.conftest import seed_channel
 
 CUSTOM_DOC_ID = 5368221678337263242

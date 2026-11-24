@@ -12,14 +12,11 @@ const LABELS: Record<Source, string> = {
 /** The down-reason chips, in the order they are offered. Shared by the card that asks
  *  and the detail pane that reports the answer back, so the two can never drift. */
 export const FEEDBACK_REASONS: { value: ItemFeedbackReason; label: string }[] = [
-  { value: 'topic', label: '不感兴趣' },
-  { value: 'promo', label: '广告营销' },
+  { value: 'topic', label: 'Not interested' },
+  { value: 'promo', label: 'Ad / Marketing' },
   { value: 'ai_slop', label: 'AI Slop' },
-  // 钩子 + FOMO + 「save this 🔖」+ 正文钓在评论区。和「广告营销」分开：那个是卖东西，
-  // 这个是钓互动，喂的通道也不同（话术是词汇级的，广告更接近意图）。标签取「博眼球」
-  // 而不是直译，读者按的时候不用先在心里翻译一遍；值本身仍是那个超集。
-  { value: 'engagement_farming', label: '博眼球' },
-  { value: 'author', label: '不喜欢作者' },
+  { value: 'engagement_farming', label: 'Engagement bait' },
+  { value: 'author', label: 'Dislike author' },
 ];
 
 export const FEEDBACK_REASON_LABELS: Record<ItemFeedbackReason, string> = Object.fromEntries(

@@ -19,8 +19,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
+from tgfeed import db
+from tgfeed.app import create_app
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'rss'
 
@@ -70,7 +70,7 @@ class FakeFetch:
         self.headers[url] = (etag, last_modified, redirect_to)
 
     async def __call__(self, url, etag=None, last_modified=None):
-        from condenser.rss import FetchResult
+        from tgfeed.rss import FetchResult
 
         self.calls.append((url, etag, last_modified))
         if url not in self.bodies:
@@ -93,15 +93,15 @@ class FakeFetch:
 def rss_env(env, monkeypatch):
     """The base env, plus the RSS source switched on (it ships off — plan §7)."""
     monkeypatch.setenv('CONDENSER_RSS_ENABLED', 'true')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     yield
 
 
 def make_manager(fetch, now=NOW):
-    from condenser.config import get_settings
-    from condenser.rss import RssManager
+    from tgfeed.config import get_settings
+    from tgfeed.rss import RssManager
 
     db.init_db(os.environ['CONDENSER_DB_PATH'])
     mgr = RssManager(get_settings(), fetch_feed=fetch)
@@ -685,7 +685,7 @@ OPML = """<?xml version="1.0" encoding="UTF-8"?>
 
 
 def test_opml_parsing_flattens_nested_groups(rss_env):
-    from condenser.rss import parse_opml
+    from tgfeed.rss import parse_opml
 
     found = parse_opml(OPML)
     assert [f['url'] for f in found] == [HN_URL, ATOM_URL, BLOG_URL]
@@ -693,7 +693,7 @@ def test_opml_parsing_flattens_nested_groups(rss_env):
 
 
 def test_opml_parsing_rejects_broken_xml(rss_env):
-    from condenser.rss import parse_opml
+    from tgfeed.rss import parse_opml
 
     with pytest.raises(ValueError):
         parse_opml('<opml><body><outline xmlUrl="https://e.com/f"></body>')
@@ -853,7 +853,7 @@ def test_source_disabled_rejects_writes_and_reports_status(env, monkeypatch):
     reported success would archive nothing (HN's B2). It ships false, so this is
     also the default deployed state until iOS can render the cards (plan §7)."""
     monkeypatch.setenv('CONDENSER_RSS_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     with _client() as client:
@@ -906,7 +906,7 @@ def test_status_reports_the_source_state(rss_env):
 
 
 def test_backoff_doubles_from_the_poll_interval_and_caps_at_a_week():
-    from condenser.rss import backoff_delay
+    from tgfeed.rss import backoff_delay
 
     assert backoff_delay(1, base_minutes=30, max_days=7) == timedelta(minutes=30)
     assert backoff_delay(2, base_minutes=30, max_days=7) == timedelta(hours=1)
@@ -979,7 +979,7 @@ def test_a_deferred_feed_does_not_hold_up_the_others(rss_env):
 
 
 def test_a_feed_is_abnormal_past_the_failure_streak(rss_env):
-    from condenser.rss import describe_subscription
+    from tgfeed.rss import describe_subscription
 
     url = 'https://dead.example/f.xml'
     fetch = FakeFetch()

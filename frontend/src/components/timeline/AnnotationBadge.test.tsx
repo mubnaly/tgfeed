@@ -30,8 +30,8 @@ describe('AnnotationBadge', () => {
 
   it('marks an item carrying a note or a highlight', () => {
     render(<AnnotationBadge item={makeItem({ note: '想法' })} />);
-    expect(screen.getByLabelText('有评论或高亮')).toBeInTheDocument();
+    expect(screen.getByLabelText('Has comments or highlights')).toBeInTheDocument();
     render(<AnnotationBadge item={makeItem({ annotations: [highlight] })} />);
-    expect(screen.getAllByLabelText('有评论或高亮')).toHaveLength(2);
+    expect(screen.getAllByLabelText('Has comments or highlights')).toHaveLength(2);
   });
 });

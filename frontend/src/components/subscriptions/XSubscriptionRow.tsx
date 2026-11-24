@@ -30,10 +30,10 @@ export function XSubscriptionRow({
   if (push?.parse_errors) parts.push(`${push.parse_errors} parse errors`);
   // Following only, and worth showing: these are the two things X pads the feed
   // with, and a count of 0 where you expected some means a filter stopped working.
-  if (push?.filtered_ads) parts.push(`${push.filtered_ads} 条广告已滤除`);
-  if (push?.filtered_old) parts.push(`${push.filtered_old} 条超期（只存档）`);
+  if (push?.filtered_ads) parts.push(`${push.filtered_ads} ads filtered`);
+  if (push?.filtered_old) parts.push(`${push.filtered_old} expired (archived)`);
   // For You only: the global-language ingest filter's work on the last push.
-  if (push?.filtered_lang) parts.push(`${push.filtered_lang} 条外语已滤除`);
+  if (push?.filtered_lang) parts.push(`${push.filtered_lang} foreign language filtered`);
 
   return (
     <div className="flex items-center gap-3 px-4 py-3 sm:px-5">

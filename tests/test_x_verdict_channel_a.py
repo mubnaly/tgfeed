@@ -32,8 +32,8 @@ acquit a 6-times-downvoted ad account outright.
 
 import pytest
 
-from condenser import authors
-from condenser.config import get_settings
+from tgfeed import authors
+from tgfeed.config import get_settings
 
 
 def labeled(handle, verdict):

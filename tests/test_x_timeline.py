@@ -21,9 +21,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db, preview, x
-from condenser.app import create_app
-from condenser.items import parse_key, x_key
+from tgfeed import db, preview, x
+from tgfeed.app import create_app
+from tgfeed.items import parse_key, x_key
 
 FIXTURES = Path(__file__).parent / 'fixtures' / 'x'
 
@@ -563,7 +563,7 @@ def _judge(tweet_id, verdict):
 def test_the_aggregate_admits_nothing_from_foryou_by_default(env, monkeypatch):
     """Deploying this must not change what the aggregate shows — the mode is opt-in,
     and an absent/garbled config reads as 'none' rather than as permission."""
-    from condenser.sources import x as x_source
+    from tgfeed.sources import x as x_source
 
     with _client() as client:
         _login(client)
@@ -700,7 +700,7 @@ def test_the_sidebar_total_counts_only_what_the_aggregate_shows(env, monkeypatch
 
 def test_home_fetch_count_defaults_to_the_reduced_capacity(env):
     """For You re-samples every call, so the default n is the capacity lever."""
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     assert get_settings().condenser_x_home_count == 20
     _ = os.environ  # (env fixture pins the rest of the config)

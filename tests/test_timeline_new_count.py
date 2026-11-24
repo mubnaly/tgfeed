@@ -10,8 +10,8 @@ composite-cursor rules (a source without an anchor is skipped; garbage is 422).
 
 from fastapi.testclient import TestClient
 
-from condenser import db, filters
-from condenser.app import create_app
+from tgfeed import db, filters
+from tgfeed.app import create_app
 from tests.conftest import md, seed_channel, seed_messages
 from tests.test_multi_source import _future_naive, seed_hn, subscribe_hn
 

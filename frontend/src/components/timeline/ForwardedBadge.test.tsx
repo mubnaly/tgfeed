@@ -22,7 +22,7 @@ describe('ForwardedBadge', () => {
     expect(container).toBeEmptyDOMElement();
 
     rerender(<ForwardedBadge item={item({ forwarded_by_me: true })} />);
-    expect(screen.getByLabelText('已转发到我的频道')).toBeInTheDocument();
+    expect(screen.getByLabelText('Forwarded to my channel')).toBeInTheDocument();
   });
 
   it('ignores telegram.is_forwarded, which points the other way', () => {

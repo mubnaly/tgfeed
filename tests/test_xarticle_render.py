@@ -15,7 +15,7 @@ Plan: kb/plans/2026-09-16-x-article-full-content.md §4.1
 import json
 from pathlib import Path
 
-from condenser import xarticle
+from tgfeed import xarticle
 
 SAMPLE = json.loads((Path(__file__).parent / 'fixtures' / 'x' / 'article_detail.json').read_text())
 

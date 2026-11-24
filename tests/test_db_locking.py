@@ -35,7 +35,7 @@ import threading
 
 from telememo import db as tdb
 
-from condenser import db
+from tgfeed import db
 
 URL = 'https://example.com/feed.xml'
 

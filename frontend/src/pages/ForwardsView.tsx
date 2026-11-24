@@ -44,7 +44,7 @@ export function ForwardsView() {
       {query.data && entries.length === 0 && (
         <div className="flex flex-col items-center gap-2 py-24 text-center text-muted-foreground">
           <Repeat2 className="size-8" />
-          <p className="text-sm">Nothing forwarded yet. Use 转发 in an item&apos;s detail pane and it lands here.</p>
+          <p className="text-sm">Nothing forwarded yet. Use Forward in an item&apos;s detail pane and it lands here.</p>
         </div>
       )}
 

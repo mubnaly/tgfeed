@@ -15,8 +15,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
+from tgfeed import db
+from tgfeed.app import create_app
 from tests.conftest import seed_channel
 
 STORY_ID = 44123
@@ -106,7 +106,7 @@ def test_forward_hn_story_renders_title_link_plus_source_line(env):
         assert _sent_text(send_message) == (
             '值得一读\n\n'
             '<b><a href="https://ex.com/vec">Show HN: A tiny SQLite vector index</a></b>\n'
-            f'<a href="https://news.ycombinator.com/item?id={STORY_ID}">Hacker News · 342 分 · 128 评论</a>'
+            f'<a href="https://news.ycombinator.com/item?id={STORY_ID}">Hacker News · 342 points · 128 comments</a>'
         )
         assert send_message.await_args.kwargs['parse_mode'] == 'html'
         forward_messages.assert_not_awaited()
@@ -123,7 +123,7 @@ def test_forward_hn_self_post_points_both_lines_at_the_discussion(env):
         comments = f'https://news.ycombinator.com/item?id={STORY_ID}'
         assert _sent_text(send_message) == (
             f'<b><a href="{comments}">Ask HN: How do you back up SQLite?</a></b>\n'
-            f'<a href="{comments}">Hacker News · 89 分 · 54 评论</a>'
+            f'<a href="{comments}">Hacker News · 89 points · 54 comments</a>'
         )
 
 

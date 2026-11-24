@@ -20,9 +20,9 @@ from datetime import timedelta
 import pytest
 from fastapi.testclient import TestClient
 
-from condenser import db, search
-from condenser.app import create_app
-from condenser.text import ELLIPSIS, EXCERPT_CHARS
+from tgfeed import db, search
+from tgfeed.app import create_app
+from tgfeed.text import ELLIPSIS, EXCERPT_CHARS
 from tests.conftest import BASE
 
 FEED_A = 'https://a.example.com/feed.xml'
@@ -44,7 +44,7 @@ def rss_env(env, monkeypatch):
     """
     monkeypatch.setenv('CONDENSER_RSS_ENABLED', 'true')
     monkeypatch.setenv('CONDENSER_CLEANUP_RSS_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
 

@@ -81,41 +81,39 @@ export function RssSection() {
     mutationFn: api.rssSubscribe,
     onSuccess: (sub) => {
       setUrl('');
-      toast.success(`已订阅 ${sub.name ?? sub.url} —— 马上抓一轮`);
+      toast.success(`Subscribed to ${sub.name ?? sub.url}`);
       invalidate();
     },
-    onError: (e) => toast.error(errorMessage(e, '订阅失败')),
+    onError: (e) => toast.error(errorMessage(e, 'Subscription failed')),
   });
   const importOpml = useMutation({
     mutationFn: api.rssImportOpml,
     onSuccess: (r) => {
       // All three counts, always: "added 40" alone hides that 12 were unusable.
-      toast.success(`导入完成：新增 ${r.added} 个，已有 ${r.skipped_existing} 个，无法识别 ${r.invalid} 个`);
+      toast.success(`Import complete: ${r.added} added, ${r.skipped_existing} existing, ${r.invalid} invalid`);
       invalidate();
     },
-    onError: (e) => toast.error(errorMessage(e, 'OPML 导入失败')),
+    onError: (e) => toast.error(errorMessage(e, 'OPML import failed')),
   });
   const setEnabled = useMutation({
     mutationFn: ({ url: feedUrl, enabled }: { url: string; enabled: boolean }) => api.rssSetEnabled(feedUrl, enabled),
-    onError: (e) => toast.error(errorMessage(e, '更新失败')),
+    onError: (e) => toast.error(errorMessage(e, 'Update failed')),
     onSettled: invalidate,
   });
   const refresh = useMutation({
     mutationFn: api.rssRefresh,
     onSuccess: (r) => {
-      // The outcome in words, because the click was a question ("is it back?"):
-      // the error verbatim on failure, the count on success.
       const label = r.subscription.name ?? r.subscription.url;
-      if (r.ok) toast.success(`${label} 抓取成功${r.new > 0 ? `，新增 ${r.new} 条` : '，无新内容'}`);
-      else toast.error(`${label} 仍然失败：${r.subscription.last_error ?? '未知错误'}`);
+      if (r.ok) toast.success(`${label} fetched successfully${r.new > 0 ? ` (+${r.new} new)` : ' (no new content)'}`);
+      else toast.error(`${label} failed: ${r.subscription.last_error ?? 'Unknown error'}`);
     },
-    onError: (e) => toast.error(errorMessage(e, '抓取失败')),
+    onError: (e) => toast.error(errorMessage(e, 'Fetch failed')),
     onSettled: invalidate,
   });
   const unsubscribe = useMutation({
     mutationFn: api.rssUnsubscribe,
-    onSuccess: () => toast.success('已退订 —— 已存档的条目保留'),
-    onError: (e) => toast.error(errorMessage(e, '退订失败')),
+    onSuccess: () => toast.success('Unsubscribed — archived entries preserved'),
+    onError: (e) => toast.error(errorMessage(e, 'Unsubscribe failed')),
     onSettled: invalidate,
   });
 
@@ -133,13 +131,11 @@ export function RssSection() {
     <section>
       <div className="space-y-3 border-b px-4 py-3 sm:px-5">
         <p className="text-xs text-muted-foreground">
-          标准 RSS / Atom 订阅，服务端按 <span className="font-medium">条件请求</span> 定时轮询（多数轮次是
-          304，所以上百个 feed 也很便宜）。 首次订阅时超过一周的旧文章直接归档为已读，只有一周内的进未读。
-          连续失败的 feed 会指数退避（最长一周一次）并标为「异常」，不会自动退订或暂停。
+          Standard RSS / Atom feeds, polled on a regular schedule using conditional HTTP requests.
         </p>
         {disabled && (
           <p className="text-xs text-destructive">
-            服务端已禁用 RSS 信源（CONDENSER_RSS_ENABLED=false），订阅与轮询都不会运行。
+            RSS source is disabled on server (CONDENSER_RSS_ENABLED=false).
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +183,7 @@ export function RssSection() {
           <Spinner className="size-5 text-muted-foreground" />
         </div>
       ) : rows.length === 0 ? (
-        <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5">还没有 RSS 订阅。</p>
+        <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5">No RSS subscriptions yet.</p>
       ) : (
         <div className="divide-y">
           {rows.map((sub) => (
@@ -210,7 +206,7 @@ export function RssSection() {
         open={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
         title="Unsubscribe from this feed?"
-        description="停止轮询，已存档的条目保留。重新订阅会从上次的位置续抓，不会重下已有的窗口。"
+        description="Polling will stop. Previously archived entries remain."
         destructive
         confirmLabel="Unsubscribe"
         pending={unsubscribe.isPending}
@@ -242,7 +238,7 @@ function RssStatusLine({ status }: { status: RssStatus }) {
         {parts.join(' · ')}
         {status.feeds_error > 0 && <span className="text-destructive"> · {status.feeds_error} feeds failing</span>}
         {status.feeds_abnormal > 0 && (
-          <span className="text-amber-600 dark:text-amber-500"> · {status.feeds_abnormal} 个异常 feed 已退避</span>
+          <span className="text-amber-600 dark:text-amber-500"> · {status.feeds_abnormal} degraded feeds backed off</span>
         )}
         {status.last_error && <span className="text-destructive"> · {status.last_error}</span>}
       </div>
@@ -256,16 +252,16 @@ function RssSummaryLine({ summary }: { summary: RssStatus['summary'] }) {
   if (!summary.enabled) {
     return (
       <div>
-        AI 摘要未开启（服务端未配置 CONDENSER_SUMMARY_API_KEY）
-        {summary.pending > 0 && ` · ${summary.pending} 条未读文章可摘要`}
+        AI summary disabled (CONDENSER_SUMMARY_API_KEY not set)
+        {summary.pending > 0 && ` · ${summary.pending} articles pending`}
       </div>
     );
   }
   return (
     <div>
-      {`AI 摘要 ${summary.model} · 已生成 ${summary.done} 条`}
-      {summary.pending > 0 && ` · 待处理 ${summary.pending} 条`}
-      {summary.failed > 0 && <span className="text-amber-600 dark:text-amber-500"> · {summary.failed} 条已放弃</span>}
+      {`AI summary ${summary.model} · ${summary.done} generated`}
+      {summary.pending > 0 && ` · ${summary.pending} pending`}
+      {summary.failed > 0 && <span className="text-amber-600 dark:text-amber-500"> · ${summary.failed} discarded</span>}
     </div>
   );
 }

@@ -51,29 +51,29 @@ function renderPrompt() {
 describe('VibeReaderPrompt', () => {
   it('shows nothing until the bridge says hello', () => {
     renderPrompt();
-    expect(screen.queryByText('检测到 Vibe Reader')).toBeNull();
+    expect(screen.queryByText('Vibe Reader detected')).toBeNull();
   });
 
   it('prompts on the first hello when the link is off', async () => {
     renderPrompt();
     fromBridge({ type: 'vibe-reader:hello', linked: false });
-    expect(await screen.findByText('检测到 Vibe Reader')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '开启' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '不再提示' })).toBeInTheDocument();
+    expect(await screen.findByText('Vibe Reader detected')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enable' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: "Don't show again" })).toBeInTheDocument();
   });
 
-  it('开启 asks the extension to link — the toast does not flip the state itself', async () => {
+  it('Enable asks the extension to link — the toast does not flip the state itself', async () => {
     renderPrompt();
     fromBridge({ type: 'vibe-reader:hello', linked: false });
-    await userEvent.click(await screen.findByRole('button', { name: '开启' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Enable' }));
     expect(posted).toContainEqual({ ns: PAGE_NS, v: PROTOCOL_VERSION, type: 'condenser:set-link', linked: true });
     expect(localStorage.getItem(VIBE_READER_PROMPT_KEY)).toBeNull();
   });
 
-  it('不再提示 remembers the dismissal, and a fresh mount no longer prompts', async () => {
+  it("Don't show again remembers the dismissal, and a fresh mount no longer prompts", async () => {
     const first = renderPrompt();
     fromBridge({ type: 'vibe-reader:hello', linked: false });
-    await userEvent.click(await screen.findByRole('button', { name: '不再提示' }));
+    await userEvent.click(await screen.findByRole('button', { name: "Don't show again" }));
     expect(localStorage.getItem(VIBE_READER_PROMPT_KEY)).toBe('dismissed');
     expect(posted.find((m) => (m as { type: string }).type === 'condenser:set-link')).toBeUndefined();
     first.unmount();
@@ -84,7 +84,7 @@ describe('VibeReaderPrompt', () => {
     await act(async () => {
       await new Promise((r) => setTimeout(r, 20));
     });
-    expect(screen.queryByText('检测到 Vibe Reader')).toBeNull();
+    expect(screen.queryByText('Vibe Reader detected')).toBeNull();
   });
 
   it('does not prompt when the extension reports the link already on', async () => {
@@ -93,18 +93,18 @@ describe('VibeReaderPrompt', () => {
     await act(async () => {
       await new Promise((r) => setTimeout(r, 20));
     });
-    expect(screen.queryByText('检测到 Vibe Reader')).toBeNull();
+    expect(screen.queryByText('Vibe Reader detected')).toBeNull();
   });
 
   it('prompts once per page load even if the bridge reconnects', async () => {
     renderPrompt();
     fromBridge({ type: 'vibe-reader:hello', linked: false });
-    await screen.findByText('检测到 Vibe Reader');
+    await screen.findByText('Vibe Reader detected');
     fromBridge({ type: 'vibe-reader:bye' });
     fromBridge({ type: 'vibe-reader:hello', linked: false });
     await act(async () => {
       await new Promise((r) => setTimeout(r, 20));
     });
-    expect(screen.getAllByText('检测到 Vibe Reader')).toHaveLength(1);
+    expect(screen.getAllByText('Vibe Reader detected')).toHaveLength(1);
   });
 });

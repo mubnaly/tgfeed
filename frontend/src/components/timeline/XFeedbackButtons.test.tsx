@@ -30,7 +30,7 @@ function wrap(ui: ReactNode) {
 
 const up = () => screen.getByLabelText('More like this');
 const down = () => screen.getByLabelText('Less like this');
-const reasonRow = () => screen.queryByText('为什么？');
+const reasonRow = () => screen.queryByText('Why?');
 
 describe('XFeedbackButtons', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -128,7 +128,7 @@ describe('XFeedbackButtons', () => {
     wrap(<XFeedbackButtons itemKey="x:1" feedback={null} />);
     await userEvent.click(down());
 
-    await userEvent.click(screen.getByRole('button', { name: '不感兴趣' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Not interested' }));
 
     await waitFor(() => expect(reasonRow()).not.toBeInTheDocument());
   });
@@ -137,7 +137,7 @@ describe('XFeedbackButtons', () => {
     wrap(<XFeedbackButtons itemKey="x:1" feedback={null} />);
     await userEvent.click(down());
 
-    await userEvent.click(screen.getByLabelText('跳过'));
+    await userEvent.click(screen.getByLabelText('Skip'));
 
     expect(reasonRow()).not.toBeInTheDocument();
     expect(api.setFeedback).toHaveBeenCalledTimes(1);

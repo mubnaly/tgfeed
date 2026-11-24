@@ -12,7 +12,7 @@ import logging
 
 import pytest
 
-from condenser import logconf
+from tgfeed import logconf
 
 
 def make_record(name='condenser.ingest', msg='hello %s', args=('world',), exc_info=None):

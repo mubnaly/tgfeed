@@ -69,9 +69,9 @@ export function RssSubscriptionRow({
           {sub.abnormal ? (
             <span
               className="shrink-0 rounded bg-amber-200/80 px-1.5 py-px text-[10px] font-medium leading-4 text-amber-900 dark:bg-amber-900/60 dark:text-amber-100"
-              title="连续失败已超过阈值，轮询已退避（最长一周一次）"
+              title="Repeated errors exceeded threshold; polling backed off"
             >
-              异常
+              Degraded
             </span>
           ) : failing ? (
             <AlertTriangle className="size-3.5 shrink-0 text-destructive" aria-label="Feed is failing" />
@@ -95,13 +95,13 @@ export function RssSubscriptionRow({
           </div>
         )}
       </div>
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ms-auto flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
           className="size-8 text-muted-foreground"
           aria-label={`Refresh ${sub.url}`}
-          title="立即抓取一次（无视退避与暂停）"
+          title="Fetch now"
           disabled={refreshing}
           onClick={onRefresh}
         >

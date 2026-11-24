@@ -40,14 +40,14 @@ export function VibeReaderBadge({ urls }: { urls: readonly string[] }) {
 function describe(state: VibeReaderStatusState, modes?: string[]): string {
   switch (state) {
     case 'queued':
-      return 'Vibe Reader 排队中';
+      return 'Vibe Reader queued';
     case 'extracting':
-      return 'Vibe Reader 正在提取正文';
+      return 'Vibe Reader extracting content';
     case 'generating':
-      return 'Vibe Reader 正在生成';
+      return 'Vibe Reader generating summary';
     case 'done':
-      return modes && modes.length > 0 ? `Vibe Reader 已就绪 · ${modes.join(', ')}` : 'Vibe Reader 已就绪';
+      return modes && modes.length > 0 ? `Vibe Reader ready · ${modes.join(', ')}` : 'Vibe Reader ready';
     case 'error':
-      return 'Vibe Reader 生成失败';
+      return 'Vibe Reader failed to generate';
   }
 }

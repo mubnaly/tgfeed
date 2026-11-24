@@ -78,37 +78,37 @@ describe('SettingsDialog Telegram section', () => {
   });
 });
 
-describe('SettingsDialog 语言 section', () => {
+describe('SettingsDialog Language section', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(api.patchAppMeta).mockResolvedValue(meta(['zh']));
+    vi.mocked(api.patchAppMeta).mockResolvedValue(meta(['en']));
   });
 
   it('selecting a language PATCHes the whole new list', async () => {
-    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['zh']));
+    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['en']));
+    renderDialog();
+
+    await userEvent.click(await screen.findByRole('checkbox', { name: 'العربية' }));
+
+    await waitFor(() => expect(api.patchAppMeta).toHaveBeenCalledWith({ languages: ['en', 'ar'] }));
+  });
+
+  it('deselecting removes only that language', async () => {
+    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['en', 'ar']));
     renderDialog();
 
     await userEvent.click(await screen.findByRole('checkbox', { name: 'English' }));
 
-    await waitFor(() => expect(api.patchAppMeta).toHaveBeenCalledWith({ languages: ['zh', 'en'] }));
-  });
-
-  it('deselecting removes only that language', async () => {
-    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['zh', 'en']));
-    renderDialog();
-
-    await userEvent.click(await screen.findByRole('checkbox', { name: '中文' }));
-
-    await waitFor(() => expect(api.patchAppMeta).toHaveBeenCalledWith({ languages: ['en'] }));
+    await waitFor(() => expect(api.patchAppMeta).toHaveBeenCalledWith({ languages: ['ar'] }));
   });
 
   it('reflects the stored selection', async () => {
-    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['ja']));
+    vi.mocked(api.getAppMeta).mockResolvedValue(meta(['ar']));
     renderDialog();
 
     // findBy + checked waits out the app-meta fetch (all pills start unchecked)
-    expect(await screen.findByRole('checkbox', { name: '日本語', checked: true })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: '中文' })).toHaveAttribute('aria-checked', 'false');
+    expect(await screen.findByRole('checkbox', { name: 'العربية', checked: true })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'English' })).toHaveAttribute('aria-checked', 'false');
   });
 });
 
@@ -142,8 +142,8 @@ describe('SettingsDialog Vibe Reader section', () => {
 
   it('says no extension was detected and keeps the switch disabled', async () => {
     renderDialog();
-    expect(await screen.findByText('未检测到扩展')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: 'Vibe Reader 联动' })).toBeDisabled();
+    expect(await screen.findByText('Extension not detected')).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Vibe Reader Sync' })).toBeDisabled();
   });
 
   // The switch only asks; the extension answers with vibe-reader:link. Until it
@@ -151,8 +151,8 @@ describe('SettingsDialog Vibe Reader section', () => {
   it('mirrors the bridge and asks the extension to flip the link', async () => {
     renderDialog();
     fromBridge({ type: 'vibe-reader:hello', linked: false });
-    expect(await screen.findByText('已连接 · 联动关闭')).toBeInTheDocument();
-    const sw = screen.getByRole('switch', { name: 'Vibe Reader 联动' });
+    expect(await screen.findByText('Connected · Sync inactive')).toBeInTheDocument();
+    const sw = screen.getByRole('switch', { name: 'Vibe Reader Sync' });
     expect(sw).toBeEnabled();
 
     await userEvent.click(sw);
@@ -160,23 +160,23 @@ describe('SettingsDialog Vibe Reader section', () => {
     expect(sw).toHaveAttribute('aria-checked', 'false');
 
     fromBridge({ type: 'vibe-reader:link', linked: true });
-    expect(await screen.findByText('已连接 · 联动开启')).toBeInTheDocument();
+    expect(await screen.findByText('Connected · Sync active')).toBeInTheDocument();
     expect(sw).toHaveAttribute('aria-checked', 'true');
   });
 
   it('goes back to "no extension" when the sidepanel closes — not to a phantom version mismatch', async () => {
     renderDialog();
     fromBridge({ type: 'vibe-reader:hello', linked: true });
-    expect(await screen.findByText('已连接 · 联动开启')).toBeInTheDocument();
+    expect(await screen.findByText('Connected · Sync active')).toBeInTheDocument();
     fromBridge({ type: 'vibe-reader:bye' });
-    expect(await screen.findByText('未检测到扩展')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: 'Vibe Reader 联动' })).toBeDisabled();
+    expect(await screen.findByText('Extension not detected')).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Vibe Reader Sync' })).toBeDisabled();
   });
 
   it('names a protocol mismatch instead of offering a switch that cannot work', async () => {
     renderDialog();
     fromBridge({ type: 'vibe-reader:hello', linked: true, v: PROTOCOL_VERSION + 1 });
-    expect(await screen.findByText(`已连接 · 协议版本不匹配 (v${PROTOCOL_VERSION + 1})`)).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: 'Vibe Reader 联动' })).toBeDisabled();
+    expect(await screen.findByText(`Connected · Protocol mismatch (v${PROTOCOL_VERSION + 1})`)).toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Vibe Reader Sync' })).toBeDisabled();
   });
 });

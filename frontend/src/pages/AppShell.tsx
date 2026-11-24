@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Menu, Sparkles, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Outlet, useLocation } from 'react-router-dom';
 
+import { NafiLogo } from '@/components/NafiLogo';
 import { Sidebar } from '@/components/Sidebar';
 import { ItemDetailPane } from '@/components/timeline/ItemDetailPane';
 import { Button } from '@/components/ui/button';
 import { VibeReaderPrompt } from '@/components/VibeReaderPrompt';
+import { useI18n } from '@/i18n';
 import { ItemDetailPaneProvider } from '@/lib/itemDetailPane';
 import { installVibeReader } from '@/lib/vibeReader';
 
 export function AppShell() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
@@ -30,12 +33,12 @@ export function AppShell() {
           <Button variant="ghost" size="icon" className="size-8" onClick={() => setOpen(true)} aria-label="Open menu">
             <Menu />
           </Button>
-          <Sparkles className="size-4 text-amber-500" />
-          <span className="font-semibold">Condenser</span>
+          <NafiLogo size={20} />
+          <span className="font-bold">{t('app.name')}</span>
         </div>
 
         {/* Desktop sidebar */}
-        <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r bg-sidebar md:block">
+        <aside className="fixed inset-y-0 start-0 z-20 hidden w-64 border-e bg-sidebar md:block">
           <Sidebar />
         </aside>
 
@@ -43,11 +46,11 @@ export function AppShell() {
         {open && (
           <div className="fixed inset-0 z-40 md:hidden">
             <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-            <div className="absolute inset-y-0 left-0 w-72 max-w-[85%] border-r bg-sidebar shadow-xl">
+            <div className="absolute inset-y-0 start-0 w-72 max-w-[85%] border-e bg-sidebar shadow-xl">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2 size-8"
+                className="absolute top-2 end-2 size-8"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
               >
@@ -58,7 +61,7 @@ export function AppShell() {
           </div>
         )}
 
-        <main className="md:pl-64">
+        <main className="md:ps-64">
           <div className="mx-auto min-h-dvh max-w-2xl md:border-x md:border-border">
             <Outlet />
           </div>

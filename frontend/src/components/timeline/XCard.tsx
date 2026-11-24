@@ -8,6 +8,7 @@ import { Bookmark, Heart, MessageCircle, Repeat2 } from 'lucide-react';
 import { XAvatar } from '@/components/XAvatar';
 import { useSaveToggle } from '@/hooks/useSaveToggle';
 import { compactNumber, fullDateLabel, timeLabel } from '@/lib/format';
+import { useI18n } from '@/i18n';
 import { useItemDetailPane } from '@/lib/itemDetailPane';
 import { linkify } from '@/lib/linkify';
 import { xProfileUrl } from '@/lib/sources';
@@ -23,6 +24,7 @@ import { XFeedbackButtons } from './XFeedbackButtons';
 import { XMedia } from './XMedia';
 import { XQuoteCard } from './XQuoteCard';
 import { XVerdictBadge } from './XVerdictBadge';
+import { AiSummaryButton, SummaryBox, useItemSummary } from './AiSummaryAction';
 
 interface Props {
   /** Envelope with `x` present. */
@@ -43,8 +45,20 @@ function MetricChip({ icon, value }: { icon: React.ReactNode; value: number }) {
 }
 
 function XCardImpl({ item, observe, pendingKeys }: Props) {
+  const { t } = useI18n();
   const tweet = item.x!;
   const save = useSaveToggle();
+
+  const { summary, isSummarizing, showSummary, summaryCached, summaryError, toggleOrSummarize } = useItemSummary(
+    item.key,
+  );
+
+  const handleSummaryClick = () => {
+    toggleOrSummarize({
+      title: tweet.article?.title || null,
+      text: tweet.text || tweet.article?.previewText || null,
+    });
+  };
   // The expanded outbound links (what `linkify` points at), for the Vibe Reader
   // badge; the tweet itself lives on x.com, which is never announced.
   const vrUrls = useMemo(
@@ -98,7 +112,7 @@ function XCardImpl({ item, observe, pendingKeys }: Props) {
             <span
               aria-hidden
               className={cn(
-                'absolute top-1/2 right-full mr-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
+                'absolute top-1/2 end-full me-1.5 size-2 -translate-y-1/2 rounded-full transition-colors duration-500',
                 isPending ? 'bg-emerald-500 dark:bg-emerald-400' : !item.is_read && 'bg-sky-500 dark:bg-sky-400',
               )}
             />
@@ -129,19 +143,34 @@ function XCardImpl({ item, observe, pendingKeys }: Props) {
         <ForwardedBadge item={item} />
         <AnnotationBadge item={item} />
         <VibeReaderBadge urls={vrUrls} />
+        <AiSummaryButton
+          onClick={handleSummaryClick}
+          active={Boolean(summary || showSummary)}
+          loading={isSummarizing}
+          title={summary ? t('summary.title') : t('summary.btn')}
+          className="ms-auto"
+        />
         <button
           type="button"
           onClick={() => save.mutate({ key: item.key, saved: !item.is_saved })}
           aria-label={item.is_saved ? 'Remove from saved' : 'Save'}
           aria-pressed={item.is_saved}
           className={cn(
-            'ml-auto shrink-0 rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
+            'shrink-0 rounded p-1 transition-colors hover:bg-accent hover:text-accent-foreground',
             item.is_saved ? 'text-amber-500' : 'text-muted-foreground',
           )}
         >
           <Bookmark className={cn('size-4', item.is_saved && 'fill-current')} />
         </button>
       </header>
+
+      <SummaryBox
+        show={showSummary}
+        isSummarizing={isSummarizing}
+        summary={summary}
+        cached={summaryCached}
+        error={summaryError}
+      />
 
       {tweet.rt_of_handle && (
         <div className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground/80">
@@ -154,14 +183,14 @@ function XCardImpl({ item, observe, pendingKeys }: Props) {
       )}
 
       {body && (
-        <div className="mt-1 text-sm leading-relaxed break-words whitespace-pre-wrap">{linkify(body, tweet.urls)}</div>
+        <div dir="auto" className="mt-1 text-sm leading-relaxed break-words whitespace-pre-wrap">{linkify(body, tweet.urls)}</div>
       )}
 
       {tweet.article?.title && (
         <div className="mt-2 rounded-lg border bg-muted/30 p-3">
-          <div className="text-sm font-medium">{tweet.article.title}</div>
+          <div dir="auto" className="text-sm font-medium">{tweet.article.title}</div>
           {tweet.article.previewText && (
-            <p className="mt-1 line-clamp-4 text-sm leading-relaxed text-muted-foreground">
+            <p dir="auto" className="mt-1 line-clamp-4 text-sm leading-relaxed text-muted-foreground">
               {tweet.article.previewText}
             </p>
           )}
@@ -176,10 +205,10 @@ function XCardImpl({ item, observe, pendingKeys }: Props) {
               onClick={() => openPane(item)}
               className="mt-1 text-xs font-medium text-sky-600 hover:underline dark:text-sky-400"
             >
-              查看全文
+              {t('detail.readMore')}
             </button>
           ) : (
-            tweet.article.has_content === false && <p className="mt-1 text-xs text-muted-foreground">未获取到正文</p>
+            tweet.article.has_content === false && <p className="mt-1 text-xs text-muted-foreground">Article content unavailable</p>
           )}
         </div>
       )}

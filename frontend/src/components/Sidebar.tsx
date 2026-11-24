@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Bookmark, Filter, Inbox, Radio, Repeat2, Search, Settings, Sparkles } from 'lucide-react';
+import { Bookmark, Compass, Filter, Inbox, Radio, Repeat2, Search, Send, Settings, Sparkles } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { SettingsDialog } from '@/components/SettingsDialog';
+import { NafiLogo } from '@/components/NafiLogo';
 import { navLinkClass } from '@/components/SidebarChannelLink';
 import { SidebarSourceGroup } from '@/components/SidebarSourceGroup';
 import { UnreadBadge } from '@/components/UnreadBadge';
@@ -10,9 +11,14 @@ import { Button } from '@/components/ui/button';
 import { VibeReaderDot } from '@/components/VibeReaderDot';
 import { useCollapsedSources } from '@/hooks/useCollapsedSources';
 import { useSources } from '@/hooks/useSources';
+import { useTgStatus } from '@/hooks/useTgStatus';
+import { useI18n } from '@/i18n';
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useI18n();
   const { data: sources } = useSources();
+  const { data: tgStatus } = useTgStatus();
+  const isTgAuthorized = tgStatus?.status === 'authorized';
   const { collapsed, toggle } = useCollapsedSources();
   // aggregate_unread, not unread: this badge stands above the All/Unread links, so
   // it must promise what those views can produce. They differ for X's For You,
@@ -29,41 +35,60 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col gap-4 p-3">
-      <div className="flex items-center gap-2 px-1.5 pt-1">
-        <Sparkles className="size-5 text-amber-500" />
-        <span className="font-semibold tracking-tight">Condenser</span>
+      <div className="flex items-center gap-2.5 px-1.5 pt-1">
+        <NafiLogo size={24} />
+        <span className="font-bold tracking-tight text-foreground">{t('app.name')}</span>
       </div>
 
       <nav className="flex flex-col gap-0.5">
+        {!isTgAuthorized ? (
+          <NavLink
+            to="/connect-telegram"
+            className="mb-1 flex items-center gap-2 rounded-lg bg-sky-500/15 px-3 py-2 text-xs font-semibold text-sky-600 transition-colors hover:bg-sky-500/25 dark:text-sky-400"
+            onClick={onNavigate}
+          >
+            <Send className="size-4 shrink-0" />
+            <span>{t('channels.connectBtn')}</span>
+          </NavLink>
+        ) : (
+          <div className="mb-1 flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{t('nav.source.telegram')} {t('nav.connected')}</span>
+          </div>
+        )}
         <NavLink to="/" end className={navLinkClass({ isActive: unreadActive })} onClick={onNavigate}>
           <Sparkles className="size-4" />
-          Unread
+          {t('nav.unread')}
           <UnreadBadge count={totalUnread} />
         </NavLink>
         <NavLink to="/?all=1" className={navLinkClass({ isActive: allActive })} onClick={onNavigate}>
           <Inbox className="size-4" />
-          All
+          {t('common.all')}
         </NavLink>
         <NavLink to="/saved" className={navLinkClass} onClick={onNavigate}>
           <Bookmark className="size-4" />
-          Saved
+          {t('detail.saved')}
         </NavLink>
-        {/* 转发记录紧跟 Saved：两个都是「我对这条做过什么」的档案，一个是收藏，一个是发布。 */}
+        {/* Forward log directly follows Saved: both are archives of actions taken on items. */}
         <NavLink to="/forwards" className={navLinkClass} onClick={onNavigate}>
           <Repeat2 className="size-4" />
-          Forwards
+          {t('nav.forwards')}
         </NavLink>
         <NavLink to="/search" className={navLinkClass} onClick={onNavigate}>
           <Search className="size-4" />
-          Search
+          {t('nav.search')}
         </NavLink>
         <NavLink to="/filters" className={navLinkClass} onClick={onNavigate}>
           <Filter className="size-4" />
-          Filters
+          {t('nav.filters')}
         </NavLink>
         <NavLink to="/subscriptions" className={navLinkClass} onClick={onNavigate}>
           <Radio className="size-4" />
-          Subscriptions
+          {t('nav.subscriptions')}
+        </NavLink>
+        <NavLink to="/subscriptions" className={navLinkClass} onClick={onNavigate}>
+          <Compass className="size-4 text-emerald-500" />
+          {t('nav.suggestedChannels')}
         </NavLink>
       </nav>
 
@@ -89,8 +114,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         onClick={() => setSettingsOpen(true)}
       >
         <Settings className="size-4" />
-        Settings
-        <VibeReaderDot className="ml-auto" />
+        {t('nav.settings')}
+        <VibeReaderDot className="ms-auto" />
       </Button>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

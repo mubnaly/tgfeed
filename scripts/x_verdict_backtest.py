@@ -59,10 +59,10 @@ from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from condenser import attributes, authors, db, embedding, ngram, vectors, verdict  # noqa: E402
-from condenser.channels import ChannelScore, combine, resolve  # noqa: E402
-from condenser.config import Settings, get_settings  # noqa: E402
-from condenser.db import ItemFeedback  # noqa: E402
+from tgfeed import attributes, authors, db, embedding, ngram, vectors, verdict  # noqa: E402
+from tgfeed.channels import ChannelScore, combine, resolve  # noqa: E402
+from tgfeed.config import Settings, get_settings  # noqa: E402
+from tgfeed.db import ItemFeedback  # noqa: E402
 
 # The label a correct judge would produce for each training label.
 EXPECTED = {'up': verdict.POSITIVE, 'save': verdict.POSITIVE, 'down': verdict.NEGATIVE}

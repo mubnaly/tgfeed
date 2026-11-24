@@ -42,8 +42,8 @@ export function useDeleteForward() {
     mutationFn: (id: number) => api.deleteForward(id),
     onSuccess: () => {
       invalidateItemLists(qc);
-      toast.success('已删除转发记录，频道里的消息还在');
+      toast.success('Forward record deleted; channel message was kept');
     },
-    onError: (e) => toast.error(errorMessage(e, '删除失败')),
+    onError: (e) => toast.error(errorMessage(e, 'Failed to delete record')),
   });
 }

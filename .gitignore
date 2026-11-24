@@ -2,17 +2,17 @@
 __pycache__/
 *.pyc
 *.db
+*.db-*
 *.db-journal
 .env
 tmp/
 node_modules/
 frontend/dist/
-frontend/node_modules/.tmp/
+frontend/node_modules/
 .pytest_cache/
 .ruff_cache/
 
-# firecrawl search cache (local tooling artifact)
-.firecrawl/
-
-# Telethon forward-entity name cache (runtime artifact; CONDENSER_ENTITY_CACHE_PATH)
+# Entity caches & logs
 condenser_entity_cache.json
+tgfeed_entity_cache.json
+*.log

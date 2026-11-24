@@ -22,10 +22,10 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
-from condenser import db, vectors, verdict as verdict_mod, x
-from condenser.app import create_app
-from condenser.config import get_settings
-from condenser.items import x_key
+from tgfeed import db, vectors, verdict as verdict_mod, x
+from tgfeed.app import create_app
+from tgfeed.config import get_settings
+from tgfeed.items import x_key
 from telememo import db as tdb
 
 # Relative, not a fixed date: TestClient runs the real lifespan, whose cleanup
@@ -368,7 +368,7 @@ def test_tuned_constants_are_the_backtested_ones(env):
     coverage of 0.35 at the same precision — and no negative setting beat guessing.
     Re-run the sweep before moving any of them.
     """
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     settings = get_settings()
     assert settings.condenser_verdict_max_distance == 0.6

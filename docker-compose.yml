@@ -1,16 +1,17 @@
-# Run from the condenser/ directory: `docker compose up --build`
-# telememo is installed from PyPI during the build, so the context is just this dir.
+# Run: `docker compose up --build`
 services:
-  condenser:
+  tgfeed:
     build:
       context: .
       dockerfile: Dockerfile
+    image: tgfeed:latest
+    container_name: tgfeed
     env_file: .env
     ports:
       - "8792:8792"
     volumes:
-      - condenser-data:/data
+      - tgfeed-data:/data
     restart: unless-stopped
 
 volumes:
-  condenser-data:
+  tgfeed-data:

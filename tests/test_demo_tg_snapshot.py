@@ -28,7 +28,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from condenser.app import create_app
+from tgfeed.app import create_app
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts' / 'demo_tg_snapshot.py'
 
@@ -263,7 +263,7 @@ def test_loaded_snapshot_is_a_subscribed_channel_on_the_timeline(env):
 def test_loading_marks_the_backfill_done(env):
     """No session will ever backfill this channel; an open backfill flag would
     leave the subscription reading as still syncing."""
-    from condenser import db
+    from tgfeed import db
 
     snap.load([_snapshot(RICH)])
     assert db.get_subscription(CHANNEL_ID).backfill_done is True

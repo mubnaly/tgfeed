@@ -20,14 +20,14 @@ type ModeOption = { value: XAggregateMode; label: string; hint: string };
  *  (~100-200/day, all from accounts you picked by hand) and it is never judged, so
  *  「只进推荐的」 would silently hide the whole feed. */
 const FORYOU_MODES: ModeOption[] = [
-  { value: 'none', label: '不进主时间线', hint: '只在 X 视图里看 For You' },
-  { value: 'positive', label: '只进推荐的', hint: '判定为「推荐」的推文并入 All / Unread' },
-  { value: 'all', label: '全部并入', hint: '整个 For You 并入主时间线' },
+  { value: 'none', label: 'Excluded', hint: 'View For You only in the X feed' },
+  { value: 'positive', label: 'Recommended only', hint: 'Include tweets marked as Recommended into All / Unread' },
+  { value: 'all', label: 'Include all', hint: 'Include entire For You feed in the main timeline' },
 ];
 
 const FOLLOWING_MODES: ModeOption[] = [
-  { value: 'none', label: '不进主时间线', hint: '只在 X 视图里看 Following' },
-  { value: 'all', label: '全部并入', hint: '关注的人发的都并入主时间线' },
+  { value: 'none', label: 'Excluded', hint: 'View Following only in the X feed' },
+  { value: 'all', label: 'Include all', hint: 'Include all posts from followed accounts in the main timeline' },
 ];
 
 export function xAggregateModes(feed: string): ModeOption[] {
@@ -51,6 +51,6 @@ export function useSetXAggregate(feed: string) {
       qc.invalidateQueries({ queryKey: ['timeline'] });
       qc.invalidateQueries({ queryKey: ['timeline-days'] });
     },
-    onError: (e) => toast.error(errorMessage(e, '没能修改并入主时间线的方式')),
+    onError: (e) => toast.error(errorMessage(e, 'Failed to update timeline aggregate mode')),
   });
 }

@@ -33,7 +33,7 @@ export function XSection() {
     mutationFn: api.xSubscribe,
     onSuccess: () => {
       setHandle('');
-      toast.success('已订阅 —— 本地 probe 下一轮开始抓取');
+      toast.success('Subscribed — local probe will start fetching next round');
       invalidate();
     },
     onError: (e) => toast.error(errorMessage(e, 'Could not subscribe')),
@@ -46,7 +46,7 @@ export function XSection() {
   });
   const unsubscribe = useMutation({
     mutationFn: api.xUnsubscribe,
-    onSuccess: () => toast.success('已退订 —— 已存档的推文保留'),
+    onSuccess: () => toast.success('Unsubscribed — archived tweets preserved'),
     onError: (e) => toast.error(errorMessage(e, 'Could not unsubscribe')),
     onSettled: invalidate,
   });
@@ -58,14 +58,11 @@ export function XSection() {
     <section>
       <div className="space-y-3 border-b px-4 py-3 sm:px-5">
         <p className="text-xs text-muted-foreground">
-          X 数据只存在于本机登录态里 —— 由跑在你电脑上的 <span className="font-medium">probe</span>（bird
-          CLI）按这里的订阅抓取并推送到服务端。 订阅 <span className="font-medium">Following</span>
-          （关注的人的时间线，默认并入主时间线）、<span className="font-medium">For You</span> 算法流，或按 @handle
-          单独订阅某个人。
+          X data is fetched via your local probe and pushed to the server.
         </p>
         {disabled && (
           <p className="text-xs text-destructive">
-            服务端已禁用 X 信源（CONDENSER_X_ENABLED=false），订阅与推送都会被拒绝。
+            X source is disabled on server (CONDENSER_X_ENABLED=false).
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
@@ -115,7 +112,7 @@ export function XSection() {
           <Spinner className="size-5 text-muted-foreground" />
         </div>
       ) : (subs ?? []).length === 0 ? (
-        <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5">还没有 X 订阅。</p>
+        <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5">No X subscriptions yet.</p>
       ) : (
         <div className="divide-y">
           {(subs ?? []).map((sub) => (
@@ -137,7 +134,7 @@ export function XSection() {
         open={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
         title="Unsubscribe from this feed?"
-        description="probe 不再抓取这个 feed，已存档的推文保留。重新订阅即可恢复。"
+        description="Probe will stop fetching this feed; archived tweets remain."
         destructive
         confirmLabel="Unsubscribe"
         pending={unsubscribe.isPending}
@@ -154,21 +151,20 @@ export function XSection() {
  *  and only one of them is something you can act on. */
 function XVerdictLine({ verdict }: { verdict: XStatus['verdict'] }) {
   if (!verdict?.enabled) return null;
-  if (!verdict.embedding_configured) return <div>判定：未配置 embedding（CONDENSER_EMBEDDING_API_KEY）</div>;
-  if (!verdict.index_available) return <div>判定：sqlite-vec 扩展不可用，本机无法判定</div>;
+  if (!verdict.embedding_configured) return <div>Verdict: Embedding not configured (CONDENSER_EMBEDDING_API_KEY)</div>;
+  if (!verdict.index_available) return <div>Verdict: sqlite-vec extension unavailable</div>;
   if (!verdict.ready) {
     const need = [
-      verdict.needs_positive > 0 ? `${verdict.needs_positive} 个 👍/🔖` : null,
-      verdict.needs_negative > 0 ? `${verdict.needs_negative} 个 👎` : null,
+      verdict.needs_positive > 0 ? `${verdict.needs_positive} 👍/🔖` : null,
+      verdict.needs_negative > 0 ? `${verdict.needs_negative} 👎` : null,
     ].filter(Boolean);
-    return <div>判定：攒标注中，还需 {need.join(' 和 ')} 才会开始判定</div>;
+    return <div>Verdict: Gathering feedback, needs {need.join(' and ')} to activate</div>;
   }
   const { positive, negative, neutral } = verdict.judged;
   return (
     <div>
-      判定：{verdict.positives} 正 / {verdict.negatives} 负样本 · 已判 {positive} 推荐、{negative} 可能不感兴趣、
-      {neutral} 中性
-      {!verdict.negative_enabled && <span> · 负判定已关闭（回测显示与瞎猜无异）</span>}
+      Verdict: {verdict.positives} positive / {verdict.negatives} negative samples · Judged {positive} recommended, {negative} not interested, {neutral} neutral
+      {!verdict.negative_enabled && <span> · Negative judging disabled</span>}
     </div>
   );
 }
@@ -183,7 +179,7 @@ function XStatusLine({ status }: { status: XStatus }) {
       <div>
         {parts.join(' · ')}
         {status.parse_errors > 0 && (
-          <span className="text-destructive"> · {status.parse_errors} parse errors (bird 输出可能变了)</span>
+          <span className="text-destructive"> · {status.parse_errors} parse errors (bird output format may have changed)</span>
         )}
       </div>
       <XVerdictLine verdict={status.verdict} />

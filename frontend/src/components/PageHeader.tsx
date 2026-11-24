@@ -25,7 +25,7 @@ export function PageHeader({ icon, title, meta, actions }: PageHeaderProps) {
         <h1 className="truncate text-base leading-tight font-semibold tracking-tight">{title}</h1>
         {meta != null && meta !== '' && <div className="mt-0.5 text-xs text-muted-foreground">{meta}</div>}
       </div>
-      {actions && <div className="ml-auto flex shrink-0 items-center gap-0.5">{actions}</div>}
+      {actions && <div className="ms-auto flex shrink-0 items-center gap-0.5">{actions}</div>}
     </div>
   );
 }

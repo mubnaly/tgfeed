@@ -71,7 +71,7 @@ describe('ForwardRecordRow', () => {
     wrap(<ForwardRecordRow entry={makeEntry()} />);
     expect(screen.getByText('值得一读')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'A story' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '在 Telegram 里打开这条消息' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Open message in Telegram' })).toHaveAttribute(
       'href',
       'https://t.me/mychannel/999',
     );
@@ -79,7 +79,7 @@ describe('ForwardRecordRow', () => {
 
   it('says so when there was no comment, rather than showing an empty line', () => {
     wrap(<ForwardRecordRow entry={makeEntry({ comment: null, mode: 'forward' })} />);
-    expect(screen.getByText('原样转发，没有写评论')).toBeInTheDocument();
+    expect(screen.getByText('Forwarded directly without commentary')).toBeInTheDocument();
   });
 
   it('still renders the record when the item has no snapshot', () => {
@@ -87,12 +87,12 @@ describe('ForwardRecordRow', () => {
     // never stored. The comment and the link are the record's real body anyway.
     wrap(<ForwardRecordRow entry={makeEntry({ comment: 'hi' }, null)} />);
     expect(screen.getByText('hi')).toBeInTheDocument();
-    expect(screen.getByText('转发时没有留下条目快照，只保留了这条记录。')).toBeInTheDocument();
+    expect(screen.getByText('No item snapshot available; record only.')).toBeInTheDocument();
   });
 
   it('warns that deleting the record leaves the published message alone', async () => {
     wrap(<ForwardRecordRow entry={makeEntry()} />);
-    await userEvent.click(screen.getByRole('button', { name: '删除这条记录' }));
-    expect(screen.getByText(/频道里已经发出去的那条消息不会被撤回/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Delete this record' }));
+    expect(screen.getByText(/published Telegram message will not be deleted/)).toBeInTheDocument();
   });
 });

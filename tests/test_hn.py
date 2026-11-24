@@ -11,9 +11,9 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
-from condenser import db
-from condenser.app import create_app
-from condenser.preview import LinkPreview, normalize_url
+from tgfeed import db
+from tgfeed.app import create_app
+from tgfeed.preview import LinkPreview, normalize_url
 from telememo import db as tdb
 
 TOPSTORIES = 'https://hacker-news.firebaseio.com/v0/topstories.json'
@@ -104,8 +104,8 @@ def make_manager(fetch, now=NOW, fetch_preview=_UNSET):
     """Build a network-free manager. ``fetch_preview`` defaults to a FakePreview
     (the canned story URLs are real domains — the real ``get_preview`` would hit
     the network); pass ``None`` explicitly to exercise the real cached path."""
-    from condenser.config import get_settings
-    from condenser.hn import HNManager
+    from tgfeed.config import get_settings
+    from tgfeed.hn import HNManager
 
     db.init_db(os.environ['CONDENSER_DB_PATH'])
     if fetch_preview is _UNSET:
@@ -616,7 +616,7 @@ def test_kick_safe_without_loop_and_wakes_across_threads(env):
 
 def test_backfill_disabled_by_config(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_HN_BACKFILL_DAYS', '0')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     fetch = FakeFetch()
@@ -677,7 +677,7 @@ def test_empty_preview_result_is_terminal(env):
 def test_preview_backlog_filled_newest_first_within_batch(env, monkeypatch):
     """Backfilled + pre-feature rows are swept newest-first, capped per round; dead rows excluded."""
     monkeypatch.setenv('CONDENSER_HN_PREVIEW_BATCH', '2')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     fetch = FakeFetch()
@@ -757,7 +757,7 @@ def test_fresh_positive_cache_fills_preview_with_zero_network(env):
 
 def test_preview_prefetch_disabled_by_config(env, monkeypatch):
     monkeypatch.setenv('CONDENSER_HN_PREVIEW_BATCH', '0')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     fetch = FakeFetch()
@@ -865,7 +865,7 @@ def test_resubscribe_does_not_reschedule_backfill(env):
 def test_source_disabled_rejects_writes_and_reports_status(env, monkeypatch):
     """B2: with CONDENSER_HN_ENABLED=false the sampler never runs — writes must not pretend otherwise."""
     monkeypatch.setenv('CONDENSER_HN_ENABLED', 'false')
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     get_settings.cache_clear()
     with _client() as client:

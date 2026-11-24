@@ -47,24 +47,24 @@ describe('XVerdictDetail', () => {
   it('renders a pre-ensemble verdict exactly as before', () => {
     render(<XVerdictDetail verdict="negative" meta={singleChannel} />);
 
-    expect(screen.getByText('可能不感兴趣')).toBeInTheDocument();
+    expect(screen.getByText('Likely not interested')).toBeInTheDocument();
     expect(screen.getByText('@someone')).toBeInTheDocument();
     // no channels block in the meta -> no per-channel section invented for it
-    expect(screen.queryByText(/各通道/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Channel votes/)).not.toBeInTheDocument();
   });
 
   it('lists each channels vote with its evidence', () => {
     render(<XVerdictDetail verdict="negative" meta={ensemble} />);
 
-    expect(screen.getByText(/各通道/)).toBeInTheDocument();
+    expect(screen.getByText(/Channel votes/)).toBeInTheDocument();
     // channel D: named in the reader's terms, with the words that moved it
-    expect(screen.getByText('词面特征')).toBeInTheDocument();
+    expect(screen.getByText('Lexical style')).toBeInTheDocument();
     expect(screen.getByText(/save this/)).toBeInTheDocument();
     // channel C: the deciding attribute is the evidence
-    expect(screen.getByText('内容属性')).toBeInTheDocument();
+    expect(screen.getByText('Content attributes')).toBeInTheDocument();
     expect(screen.getByText(/promo_cta/)).toBeInTheDocument();
     // votes are labeled per channel
-    expect(screen.getByText('判负')).toBeInTheDocument();
+    expect(screen.getByText('Negative')).toBeInTheDocument();
   });
 
   it('renders the author prior as a record rather than as weights', () => {
@@ -80,8 +80,8 @@ describe('XVerdictDetail', () => {
     };
     render(<XVerdictDetail verdict="negative" meta={authorPrior} />);
 
-    expect(screen.getByText('作者记录')).toBeInTheDocument();
-    expect(screen.getByText('@ibkr · 你踩过 6 次，赞过 0 次')).toBeInTheDocument();
+    expect(screen.getByText('Author history')).toBeInTheDocument();
+    expect(screen.getByText('@ibkr · Disliked 6 times, liked 0 times')).toBeInTheDocument();
   });
 
   it('marks a shadow channel so its score is not read as a vote', () => {
@@ -96,14 +96,14 @@ describe('XVerdictDetail', () => {
     };
     render(<XVerdictDetail verdict="positive" meta={shadowed} />);
 
-    expect(screen.getByText('影子（不参与投票）')).toBeInTheDocument();
-    expect(screen.queryByText('判负')).not.toBeInTheDocument();
+    expect(screen.getByText('Shadow (non-voting)')).toBeInTheDocument();
+    expect(screen.queryByText('Negative')).not.toBeInTheDocument();
   });
 
   it('keeps the abstain explanation when only the topic channel stayed silent', () => {
     // out_of_domain describes channel B; the ensemble may still have spoken
     render(<XVerdictDetail verdict="negative" meta={ensemble} />);
 
-    expect(screen.getByText('与你标注过的内容都不相似，不作判断')).toBeInTheDocument();
+    expect(screen.getByText('Dissimilar to previously labeled items; neutral')).toBeInTheDocument();
   });
 });

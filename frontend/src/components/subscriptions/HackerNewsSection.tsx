@@ -56,11 +56,11 @@ export function HackerNewsSection() {
       <div className="flex items-start justify-between gap-3 px-4 py-3 sm:px-5">
         <div>
           <p className="text-xs text-muted-foreground">
-            每日首页 story 采样存档 —— 订阅后才开始采集，官方 API 无历史，订阅一天才有一天的数据。
+            Daily front-page story archive — starts collecting upon subscribing.
           </p>
           {status && !status.source_enabled && (
             <p className="mt-1 text-xs text-destructive">
-              服务端已禁用 HN 信源（CONDENSER_HN_ENABLED=false），采样不会运行。
+              Hacker News source is disabled on server (CONDENSER_HN_ENABLED=false).
             </p>
           )}
         </div>
@@ -113,7 +113,7 @@ export function HackerNewsSection() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Unsubscribe from Hacker News?"
-        description="采样停止，已存档的 story 保留。重新订阅即可恢复采集。"
+        description="Sampling will stop. Previously archived stories remain. You can re-subscribe anytime to resume."
         destructive
         confirmLabel="Unsubscribe"
         pending={unsubscribe.isPending}

@@ -29,7 +29,7 @@ export function ForwardRecordRow({ entry }: { entry: ForwardRecordEntry }) {
           <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground/80">
             <time>{fullDateLabel(record.created_at)}</time>
             <span aria-hidden>·</span>
-            {/* 转发当时配置的频道 —— 目标改过之后，旧记录仍然指着它真正去过的地方。 */}
+            {/* The channel configured at the time of forwarding — preserves the historical target. */}
             <span>{record.target}</span>
           </div>
           {record.comment ? (
@@ -37,15 +37,15 @@ export function ForwardRecordRow({ entry }: { entry: ForwardRecordEntry }) {
               {record.comment}
             </p>
           ) : (
-            <p className="mt-1 text-sm text-muted-foreground/70 italic">原样转发，没有写评论</p>
+            <p className="mt-1 text-sm text-muted-foreground/70 italic">Forwarded directly without commentary</p>
           )}
         </div>
         <a
           href={record.link}
           target="_blank"
           rel="noreferrer"
-          title="在 Telegram 里打开这条消息"
-          aria-label="在 Telegram 里打开这条消息"
+          title="Open message in Telegram"
+          aria-label="Open message in Telegram"
           className="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <ExternalLink className="size-4" />
@@ -53,8 +53,8 @@ export function ForwardRecordRow({ entry }: { entry: ForwardRecordEntry }) {
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
-          title="删除这条记录"
-          aria-label="删除这条记录"
+          title="Delete this record"
+          aria-label="Delete this record"
           className="rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
         >
           <Trash2 className="size-4" />
@@ -64,15 +64,15 @@ export function ForwardRecordRow({ entry }: { entry: ForwardRecordEntry }) {
       {item ? (
         <DatedItemRow item={item} />
       ) : (
-        <p className="px-4 py-3 text-xs text-muted-foreground/70 sm:px-5">转发时没有留下条目快照，只保留了这条记录。</p>
+        <p className="px-4 py-3 text-xs text-muted-foreground/70 sm:px-5">No item snapshot available; record only.</p>
       )}
 
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title="删除转发记录？"
-        description="只删除本地这条记录，频道里已经发出去的那条消息不会被撤回。"
-        confirmLabel="删除记录"
+        title="Delete forward record?"
+        description="Deletes local record only; published Telegram message will not be deleted."
+        confirmLabel="Delete record"
         destructive
         pending={remove.isPending}
         onConfirm={() => {

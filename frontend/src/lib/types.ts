@@ -61,6 +61,7 @@ export interface DisplayMessage {
   forwards_count: number | null;
   replies_count: number | null;
   raw_message_ids: number[];
+  summary?: string | null;
   // present on /api/records payloads only
   channel?: ChannelRef | null;
 }

@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { ArrowRight } from 'lucide-react';
 
 import { Spinner } from '@/components/Spinner';
+import { NafiLogo } from '@/components/NafiLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,6 +51,10 @@ export function TgLogin({ status }: { status: Exclude<TgStatus, 'authorized'> })
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
+        <div className="mb-6 flex items-center gap-2.5">
+          <NafiLogo size={36} />
+          <span className="text-xl font-bold tracking-tight text-foreground">نافِع</span>
+        </div>
         <div className="mb-8">
           <h1 className="text-xl font-semibold tracking-tight">{meta.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{meta.hint}</p>

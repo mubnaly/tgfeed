@@ -13,13 +13,13 @@ export function useSetXLangFilter(feed: string) {
   return useMutation({
     mutationFn: (langFilter: boolean) => api.xSetConfig(feed, { lang_filter: langFilter }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['x-subscriptions'] }),
-    onError: (e) => toast.error(errorMessage(e, '没能修改语言过滤开关')),
+    onError: (e) => toast.error(errorMessage(e, 'Failed to update language filter')),
   });
 }
 
-/** For You's 「按全局语言过滤」 toggle, sitting beside `XAggregateMenu`.
+/** For You's global language filter toggle, sitting beside `XAggregateMenu`.
  *
- *  The language list itself is a global preference (Settings → 语言); this switch
+ *  The language list itself is a global preference (Settings → Language); this switch
  *  only says "For You obeys it". Filtering happens at ingest — a tweet outside the
  *  list is never archived — so flipping it changes future pushes, not history.
  *  With the switch on but no languages picked the filter is inert (fail-open),
@@ -31,9 +31,9 @@ export function XLangFilterToggle({ feed, enabled }: { feed: string; enabled: bo
   const needsLanguages = enabled && languages.length === 0;
   const title = enabled
     ? needsLanguages
-      ? '按全局语言过滤：开 — 先在设置中选择语言，否则不过滤'
-      : `按全局语言过滤：开（${languages.join(', ')}）`
-    : '按全局语言过滤：关 — 外语推文照常进入';
+      ? 'Filter by global languages: ON — Select languages in Settings first'
+      : `Filter by global languages: ON (${languages.join(', ')})`
+    : 'Filter by global languages: OFF — All tweets admitted';
 
   return (
     <Button
@@ -49,7 +49,7 @@ export function XLangFilterToggle({ feed, enabled }: { feed: string; enabled: bo
       onClick={() => setFilter.mutate(!enabled)}
     >
       <Languages className="size-3.5" />
-      {enabled ? (needsLanguages ? '先在设置中选择语言' : '按语言过滤') : '语言过滤关'}
+      {enabled ? (needsLanguages ? 'Select languages in Settings' : 'Filter by language') : 'Language filter off'}
     </Button>
   );
 }

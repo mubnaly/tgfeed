@@ -19,8 +19,8 @@ export function ForwardedBadge({ item }: { item: TimelineItem }) {
   if (!item.forwarded_by_me) return null;
   return (
     <span
-      title="已转发到我的频道"
-      aria-label="已转发到我的频道"
+      title="Forwarded to my channel"
+      aria-label="Forwarded to my channel"
       className="inline-flex shrink-0 items-center text-muted-foreground/80"
     >
       <Repeat2 className="size-3.5" />

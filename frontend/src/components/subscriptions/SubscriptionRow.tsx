@@ -63,15 +63,15 @@ export function SubscriptionRow({ sub }: { sub: Subscription }) {
           <TooltipContent>
             {sub.enabled ? (
               <>
-                已启用：实时同步、显示在时间线。
+                Enabled: real-time sync, shown in timeline.
                 <br />
-                点击暂停（历史保留，可随时恢复）
+                Click to pause (history preserved).
               </>
             ) : (
               <>
-                已暂停：停止同步、从时间线隐藏。
+                Paused: sync stopped, hidden from timeline.
                 <br />
-                点击恢复同步
+                Click to resume sync.
               </>
             )}
           </TooltipContent>
@@ -85,14 +85,14 @@ export function SubscriptionRow({ sub }: { sub: Subscription }) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled={fetching} onClick={() => refresh.mutate(sub.channel_id)}>
               <RefreshCw className={cn(refresh.isPending && 'animate-spin')} />
-              更新数据
+              Refresh channel
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={fetching}
               onClick={() => fetchOlder.mutate({ channelId: sub.channel_id, count: OLDER_FETCH_COUNT })}
             >
               <History />
-              继续向更早获取（{OLDER_FETCH_COUNT} 条）
+              Fetch older ({OLDER_FETCH_COUNT} messages)
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => bulkRead.mutate({ channel_id: sub.channel_id })}>
@@ -102,7 +102,7 @@ export function SubscriptionRow({ sub }: { sub: Subscription }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" disabled={fetching} onClick={() => setResetConfirmOpen(true)}>
               <RotateCcw />
-              重置数据
+              Reset data
             </DropdownMenuItem>
             <DropdownMenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
               <Trash2 />
@@ -125,10 +125,10 @@ export function SubscriptionRow({ sub }: { sub: Subscription }) {
       <ConfirmDialog
         open={resetConfirmOpen}
         onOpenChange={setResetConfirmOpen}
-        title={`重置 ${label} 的数据？`}
-        description="将删除该频道已缓存的全部消息和已读状态，然后重新同步。已保存的内容和关键词过滤规则不受影响。此操作不可撤销。"
+        title={`Reset data for ${label}?`}
+        description="Deletes cached messages and read states for this channel, then re-syncs. Saved items and keyword filters remain intact. This action cannot be undone."
         destructive
-        confirmLabel="重置数据"
+        confirmLabel="Reset data"
         pending={reset.isPending}
         onConfirm={() => reset.mutate(sub.channel_id, { onSuccess: () => setResetConfirmOpen(false) })}
       />

@@ -133,25 +133,25 @@ describe('ItemDetailPane', () => {
     vi.mocked(api.getAppMeta).mockResolvedValue({ schema_version: 6, backfill_days: 7, forward_channel: null });
   });
 
-  it('renders the 条目详情 title and the TG item info', async () => {
+  it('renders the Item Details title and the TG item info', async () => {
     renderPane(tgItem);
-    expect(screen.getByText('条目详情')).toBeInTheDocument();
+    expect(screen.getByText('Item Details')).toBeInTheDocument();
     // channel resolved from subscriptions
     expect(await screen.findByText('Tech')).toBeInTheDocument();
     // full publish time is shown
     expect(screen.getByText(/Jun 1, 2026/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '隐藏' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide' })).toBeInTheDocument();
   });
 
   it('hide posts the key, drops the item from timeline caches, closes, and offers undo', async () => {
     const qc = renderPane(tgItem);
-    await userEvent.setup().click(screen.getByRole('button', { name: '隐藏' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Hide' }));
 
     await waitFor(() => expect(api.hideItem).toHaveBeenCalledWith('tg:1:10'));
     const cached = qc.getQueryData<{ pages: TimelinePage[] }>(['timeline', 'all'])!;
     expect(cached.pages[0].items.map((it) => it.key)).toEqual(['hn:101']);
-    await waitFor(() => expect(screen.queryByText('条目详情')).not.toBeInTheDocument());
-    expect(toast).toHaveBeenCalledWith('已隐藏', expect.objectContaining({ action: expect.anything() }));
+    await waitFor(() => expect(screen.queryByText('Item Details')).not.toBeInTheDocument());
+    expect(toast).toHaveBeenCalledWith('Hide', expect.objectContaining({ action: expect.anything() }));
   });
 
   it('renders HN story details and hides by story key', async () => {
@@ -159,7 +159,7 @@ describe('ItemDetailPane', () => {
     expect(screen.getByText('alice')).toBeInTheDocument();
     expect(screen.getByText(/42/)).toBeInTheDocument();
 
-    await userEvent.setup().click(screen.getByRole('button', { name: '隐藏' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Hide' }));
     await waitFor(() => expect(api.hideItem).toHaveBeenCalledWith('hn:101'));
   });
 
@@ -167,38 +167,36 @@ describe('ItemDetailPane', () => {
     // Two different instants, and the gap between them is what the story spent
     // earning its slot — the pane is the only place a reader can see it.
     renderPane(hnItem);
-    expect(screen.getByText('上榜时间')).toBeInTheDocument();
-    expect(screen.getByText('入选时间')).toBeInTheDocument();
-    expect(screen.getByText('当日入选第 1 条')).toBeInTheDocument();
+    expect(screen.getByText('Front page')).toBeInTheDocument();
+    expect(screen.getByText('Admitted')).toBeInTheDocument();
+    expect(screen.getByText('Day #1')).toBeInTheDocument();
   });
 
   it('omits the admission row for a story that was never admitted', async () => {
     // Search reaches these; the archive timestamp is all they have.
     renderPane({ ...hnItem, hn: { ...hnItem.hn!, qualified_at: null, day_rank: null } });
-    expect(screen.getByText('上榜时间')).toBeInTheDocument();
-    expect(screen.queryByText('入选时间')).not.toBeInTheDocument();
+    expect(screen.getByText('Front page')).toBeInTheDocument();
+    expect(screen.queryByText('Admitted')).not.toBeInTheDocument();
   });
 
   it('shows the AI summary of a story once — the body block, not an info row too — and nothing without one', async () => {
-    renderPane({ ...hnItem, hn: { ...hnItem.hn!, summary: '文章讲了 X。讨论认为 Y。' } });
-    // `getByText` throws on a second match: the same words twice in one drawer
-    // is what the info row used to cause.
-    expect(screen.getByText('文章讲了 X。讨论认为 Y。')).toBeInTheDocument();
-    expect(screen.getByText('AI 摘要')).toBeInTheDocument();
+    renderPane({ ...hnItem, hn: { ...hnItem.hn!, summary: 'Article about X. Discussion agrees Y.' } });
+    expect(screen.getByText('Article about X. Discussion agrees Y.')).toBeInTheDocument();
+    expect(screen.getByText('AI Summary')).toBeInTheDocument();
     cleanup();
     renderPane(hnItem);
-    expect(screen.queryByText('AI 摘要')).not.toBeInTheDocument();
+    expect(screen.queryByText('AI Summary')).not.toBeInTheDocument();
   });
 
   it('saves by key and flips the label, then unsaves on a second click', async () => {
     renderPane(hnItem);
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole('button', { name: '收藏' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(api.saveRecord).toHaveBeenCalledWith('hn:101'));
 
     // The context holds a snapshot, so the pane mirrors its own mutation locally.
-    await user.click(await screen.findByRole('button', { name: '已收藏' }));
+    await user.click(await screen.findByRole('button', { name: 'Saved' }));
     await waitFor(() => expect(api.deleteRecord).toHaveBeenCalledWith('hn:101'));
   });
 
@@ -209,7 +207,7 @@ describe('ItemDetailPane', () => {
     function Controls() {
       const { openPane } = useItemDetailPane();
       // a fresh envelope each time, the way an updated cache hands one over
-      return <button onClick={() => openPane({ ...hnItem })}>打开</button>;
+      return <button onClick={() => openPane({ ...hnItem })}>Open</button>;
     }
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
@@ -222,23 +220,23 @@ describe('ItemDetailPane', () => {
     );
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole('button', { name: '打开' }));
-    await user.click(await screen.findByRole('button', { name: '收藏' }));
-    await screen.findByRole('button', { name: '已收藏' });
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    await user.click(await screen.findByRole('button', { name: 'Save' }));
+    await screen.findByRole('button', { name: 'Saved' });
 
     await user.click(screen.getByRole('button', { name: 'Close' }));
-    await user.click(await screen.findByRole('button', { name: '打开' }));
+    await user.click(await screen.findByRole('button', { name: 'Open' }));
 
-    expect(await screen.findByRole('button', { name: '收藏' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Save' })).toBeInTheDocument();
   });
 
   it('offers forward on every source, pointing at Settings when no target is configured', async () => {
     renderPane(hnItem);
 
-    await userEvent.setup().click(screen.getByRole('button', { name: '转发' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Forward' }));
 
     await waitFor(() => expect(toast.info).toHaveBeenCalled());
-    expect(screen.queryByText('转发到我的频道')).not.toBeInTheDocument();
+    expect(screen.queryByText('Forward to Telegram')).not.toBeInTheDocument();
   });
 
   it('opens the forward dialog for a non-TG item once a target channel exists', async () => {
@@ -249,8 +247,8 @@ describe('ItemDetailPane', () => {
     });
     renderPane(hnItem);
 
-    await userEvent.setup().click(await screen.findByRole('button', { name: '转发' }));
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Forward' }));
 
-    expect(await screen.findByText('转发到我的频道')).toBeInTheDocument();
+    expect(await screen.findByText('Forward to Telegram')).toBeInTheDocument();
   });
 });

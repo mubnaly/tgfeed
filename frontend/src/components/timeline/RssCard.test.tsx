@@ -100,7 +100,7 @@ describe('RssCard', () => {
     expect(screen.getByText('这篇文章讲了三件事。')).toBeInTheDocument();
     // The label leads the block (iOS `AiSummaryBlock`), under the title.
     const title = screen.getByRole('link', { name: 'An entry' });
-    const label = screen.getByText('AI 摘要');
+    const label = screen.getByText('AI Summary');
     const summary = screen.getByText('这篇文章讲了三件事。');
     expect(title.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(label.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -110,7 +110,7 @@ describe('RssCard', () => {
 
   it('falls back to the excerpt when the summary is only whitespace', () => {
     wrap(<RssCard item={makeItem({ summary: '  \n' })} />);
-    expect(screen.queryByText('AI 摘要')).toBeNull();
+    expect(screen.queryByText('AI Summary')).toBeNull();
     expect(screen.getByText('the feed body')).toBeInTheDocument();
   });
 
@@ -119,17 +119,17 @@ describe('RssCard', () => {
     // here — what arrives is prose the backend already stripped.
     wrap(<RssCard item={makeItem()} />);
     expect(screen.getByText('the feed body')).toBeInTheDocument();
-    expect(screen.queryByText('AI 摘要')).toBeNull();
+    expect(screen.queryByText('AI Summary')).toBeNull();
   });
 
-  it('does not offer 查看全文 for a body that already fits', () => {
+  it('does not offer Read full content for a body that already fits', () => {
     // content_truncated is the server saying "this is the whole thing"; an entry
     // over it would open a pane to reveal nothing new.
     wrap(<RssCard item={makeItem()} />);
-    expect(screen.queryByRole('button', { name: '查看全文' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Read full content' })).toBeNull();
   });
 
-  it('opens the detail pane on 查看全文 instead of expanding in place', async () => {
+  it('opens the detail pane on Read full content instead of expanding in place', async () => {
     // The article renders (and gets fetched) in the detail pane only — the iOS
     // arrangement. The card itself never fetches anything.
     wrap(
@@ -138,17 +138,17 @@ describe('RssCard', () => {
         <OpenProbe />
       </ItemDetailPaneProvider>,
     );
-    await userEvent.setup().click(screen.getByRole('button', { name: '查看全文' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Read full content' }));
 
     expect(screen.getByTestId('open-key')).toHaveTextContent('rss:77');
     expect(api.rssEntry).not.toHaveBeenCalled();
   });
 
-  it('offers 查看全文 under a summary — the pane is the only route to the source text', () => {
+  it('offers Read full content under a summary — the pane is the only route to the source text', () => {
     // A summary replaces the excerpt entirely, so without this button an entry
     // with one has no path from the card to what the feed actually said.
     wrap(<RssCard item={makeItem({ summary: '摘要。' })} />);
-    expect(screen.getByRole('button', { name: '查看全文' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Read full content' })).toBeInTheDocument();
   });
 
   it('renders a plain title when the entry has no link', () => {

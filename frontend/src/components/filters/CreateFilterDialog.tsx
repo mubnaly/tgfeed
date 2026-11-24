@@ -118,7 +118,7 @@ export function CreateFilterDialog({ open, onOpenChange }: CreateFilterDialogPro
               <Input
                 value={pattern}
                 onChange={(e) => setPattern(e.target.value)}
-                placeholder="e.g. promo, arc*, 广告"
+                placeholder="e.g. promo, arc*, ad"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();

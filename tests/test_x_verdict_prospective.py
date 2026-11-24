@@ -26,8 +26,8 @@ import json
 import os
 from datetime import datetime, timedelta
 
-from condenser import db, prospective
-from condenser.config import get_settings
+from tgfeed import db, prospective
+from tgfeed.config import get_settings
 
 NOW = datetime(2026, 7, 28, 12, 0)
 

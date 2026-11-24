@@ -27,8 +27,8 @@ from datetime import datetime, timedelta, timezone
 
 from telememo import db as tdb
 
-from condenser import cleanup, db
-from condenser.config import get_settings
+from tgfeed import cleanup, db
+from tgfeed.config import get_settings
 
 NOW = datetime(2026, 8, 7, 12, 0)
 
@@ -710,7 +710,7 @@ def test_the_endpoint_distinguishes_ran_from_deleted_nothing(env, monkeypatch):
     produce the second — the loop's first iteration runs a round immediately."""
     from fastapi.testclient import TestClient
 
-    from condenser.app import create_app
+    from tgfeed.app import create_app
 
     setup_db(monkeypatch)
     # Seeded against the real clock, not the module's fixed NOW: this test boots the

@@ -26,9 +26,9 @@ from datetime import datetime, timedelta
 
 from telememo import db as tdb
 
-from condenser import db, search
-from condenser.hn import DEFAULT_FEED_CONFIG
-from condenser.sources import hn as hn_source
+from tgfeed import db, search
+from tgfeed.hn import DEFAULT_FEED_CONFIG
+from tgfeed.sources import hn as hn_source
 from tests.conftest import BASE
 from tests.test_multi_source import _client, _login, seed_hn, subscribe_hn
 

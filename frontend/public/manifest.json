@@ -1,7 +1,7 @@
 {
-  "name": "Condenser",
-  "short_name": "Condenser",
-  "description": "Self-hosted aggregating reader: Telegram channels, Hacker News, X.",
+  "name": "نافِع | Nafi'",
+  "short_name": "نافِع",
+  "description": "قارئ الخلاصات ومحتوى تليجرام المصفّى للنفع والفائدة",
   "id": "/",
   "start_url": "/",
   "scope": "/",

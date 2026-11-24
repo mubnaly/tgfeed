@@ -22,9 +22,9 @@ import statistics
 
 import pytest
 
-from condenser import ngram
-from condenser.channels import ChannelScore, combine
-from condenser.config import get_settings
+from tgfeed import ngram
+from tgfeed.channels import ChannelScore, combine
+from tgfeed.config import get_settings
 
 # A training set in the shape of the real one: the downs share a *voice*, not a
 # subject (crypto, fitness, SaaS), and the ups share a subject the way the reader's

@@ -19,7 +19,7 @@ function OrphanRow({ annotation, onDelete }: RowProps) {
       <button
         type="button"
         onClick={() => onDelete(annotation.id)}
-        aria-label="删除这条高亮"
+        aria-label="Delete this highlight"
         className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-destructive"
       >
         <Trash2 className="size-4" />
@@ -34,8 +34,7 @@ interface Props {
 }
 
 /**
- * 正文里定位不到的高亮（原文已变）。数据绝不静默丢弃 —— 引文和评论原样列在正文之后，
- * 只是不再画在文字上（iOS `AnnotationFooterView` 的对应物）。
+ * Highlights whose positions can no longer be located in the body.
  */
 export function AnnotationOrphans({ orphans, onDelete }: Props) {
   if (orphans.length === 0) return null;
@@ -43,7 +42,7 @@ export function AnnotationOrphans({ orphans, onDelete }: Props) {
     <div className="mt-4 space-y-2">
       <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Highlighter className="size-3.5" />
-        失效的高亮（原文已变，引文保留）
+        Orphaned highlights (original text changed, quotes preserved)
       </p>
       {orphans.map((a) => (
         <OrphanRow key={a.id} annotation={a} onDelete={onDelete} />

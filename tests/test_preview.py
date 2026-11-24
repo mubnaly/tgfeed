@@ -9,8 +9,8 @@ import logging
 from bs4 import BeautifulSoup
 from fastapi.testclient import TestClient
 
-from condenser import db, preview
-from condenser.app import create_app
+from tgfeed import db, preview
+from tgfeed.app import create_app
 from tests.conftest import md, seed_channel, seed_messages
 
 SAMPLE_HTML = """
@@ -289,7 +289,7 @@ def test_image_proxy_rejects_non_image(env, monkeypatch):
 
 
 def test_image_proxy_disabled_redirects_to_origin(env, monkeypatch):
-    from condenser.config import get_settings
+    from tgfeed.config import get_settings
 
     monkeypatch.setenv('CONDENSER_PREVIEW_IMAGE_PROXY', 'false')
     get_settings.cache_clear()

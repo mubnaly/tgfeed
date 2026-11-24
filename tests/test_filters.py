@@ -5,7 +5,7 @@ import os
 import pytest
 from telememo import db as tdb
 
-from condenser import db, filters
+from tgfeed import db, filters
 from tests.conftest import md, seed_channel, seed_messages
 
 

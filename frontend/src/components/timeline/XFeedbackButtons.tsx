@@ -110,15 +110,15 @@ export function XFeedbackButtons({ itemKey, feedback, className }: Props) {
       </div>
       {asking && (
         <div className="flex flex-wrap items-center justify-end gap-1">
-          <span className="text-xs text-muted-foreground">为什么？</span>
+          <span className="text-xs text-muted-foreground">Why?</span>
           {FEEDBACK_REASONS.map((r) => (
             <ReasonChip key={r.value} label={r.label} onClick={() => pick(r.value)} />
           ))}
           <button
             type="button"
             onClick={() => setAsking(false)}
-            title="跳过"
-            aria-label="跳过"
+            title="Skip"
+            aria-label="Skip"
             className="cursor-pointer rounded p-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <X className="size-3" />
